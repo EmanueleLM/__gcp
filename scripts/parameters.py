@@ -53,7 +53,7 @@ def get_flat_parameters(seeds,
         
     if save_to_file:
         
-        np.save(dst, v)
+        np.save(dst, v, allow_pickle=True)
         return v
         
     else:
@@ -72,10 +72,10 @@ def get_adjacency_matrices(model,
         set to [(10,5), (3,7)] must have 10*5 + 3*7 parameters in the flattened vector;
        dst:string, is the .npy file used to store the matrix.
     """
-    
+        
     num_matrices = len(model)
     assert num_matrices > 0
-    adj_matrices = list([np.zeros(shape=(s)) for s in model])
+    adj_matrices = np.array([np.zeros(shape=(s)) for s in model])
         
     ptr = 0
     for i in range(num_matrices):
@@ -87,7 +87,7 @@ def get_adjacency_matrices(model,
         
     if save_to_file is True:
         
-        np.save(dst, adj_matrices)
+        np.save(dst, adj_matrices, allow_pickle=True)
         return adj_matrices
         
     else:

@@ -5,23 +5,58 @@ Created on Sun Jun 30 15:13:16 2019
 @author: Emanuele
 """
 
+import networkx as nx
+import matplotlib.pyplot as plt
 
-def write_tree(src):
-    
+
+def draw_tree(src, dst, draw_labels=True):    
     """
-       src:string, must be in the format '/path/to/seeds_files/<name>_<number>.csv', 
-        where each file contains as first element the list of seeds of the element
-        you want to extract the vector parameters. <number> must start from 0;
+       src:string, must be in the format '/path/to/seeds_files/<name>', 
+        where the file contains the lists of seeds of the element
+        you want to draw the tree from. The file must be in form [list1]\n[list2]\n..
     """
+
+    try:
+        import pygraphviz
+        from networkx.drawing.nx_agraph import graphviz_layout
+    except ImportError:
+        try:
+            import pydot
+            from networkx.drawing.nx_pydot import graphviz_layout
+        except ImportError:
+            raise ImportError("This example needs Graphviz and either "
+                              "PyGraphviz or pydot")
     
-    import os, re
-    num_files = len(next(os.walk(src))[2])  # dir is your directory path as string
-    assert num_files > 0 
-    filename = src.split('/')[-1].split('_')[0]  # extract filename
-    
-    for i in range(num_files):
+    G = nx.DiGraph()
+       
+    with open(src) as fp:  
         
-        file_ = filename + str(i) + '.csv'
-        f = open(file_, "r")
-        list_seeds = re.search(r"\[([A-Za-z0-9_]+)\]", f.read())
-        list_seeds = list_seeds.split(',')  
+        line = fp.readline()
+        cnt = 1
+        
+        while line:
+            
+            edges = list(line.replace(' ', '').strip("[]\n").split(','))
+            graph_edges = []
+            
+            for i in range(len(edges)-1):
+                
+                connection = (edges[i], edges[i+1])
+                graph_edges.append(connection)
+                
+            
+            G.add_edges_from(graph_edges)
+                
+            line = fp.readline()
+            cnt += 1
+            
+            if cnt == 50:
+                break
+            
+    #pos = nx.spring_layout(G)        
+    pos = graphviz_layout(G, prog='twopi', args='')
+    plt.figure(figsize=(100, 100))
+    nx.draw(G, pos, node_size=200, alpha=0.5, node_color="blue", with_labels=draw_labels)
+    plt.axis('equal')
+    plt.savefig(dst+'.png', format='png')
+    plt.savefig(dst+'.eps', format='eps')
