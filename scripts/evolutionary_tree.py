@@ -50,13 +50,10 @@ def draw_tree(src, dst, draw_labels=True):
             line = fp.readline()
             cnt += 1
             
-            if cnt == 50:
-                break
-            
     #pos = nx.spring_layout(G)        
     pos = graphviz_layout(G, prog='twopi', args='')
     plt.figure(figsize=(100, 100))
-    nx.draw(G, pos, node_size=200, alpha=0.5, node_color="blue", with_labels=draw_labels)
+    nx.draw(G, pos, node_size=500, alpha=0.5, node_color="blue", with_labels=draw_labels)
     plt.axis('equal')
     plt.savefig(dst+'.png', format='png')
     plt.savefig(dst+'.eps', format='eps')
