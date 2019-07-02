@@ -32,7 +32,7 @@ def get_flat_parameters(seeds,
                         parameters=1008450,
                         seed=123,
                         count=250000000,
-                        noise_stdev=5e-3, 
+                        noise_stdev=5e-3,
                         save_to_file=False, 
                         dst='flat.npy'):
     """
