@@ -44,7 +44,7 @@ def get_flat_parameters(seeds,
     number_seeds = len(seeds)
     assert number_seeds > 0
         
-    noise = SharedNoiseTable(seed, count)  # initialize the noise matrix
+    noise = SharedNoiseTable(seed, count)  # initialize the noise matrix    
     v = np.zeros(shape=(number_seeds, parameters))
         
     for i  in range(number_seeds):
