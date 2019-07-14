@@ -36,6 +36,8 @@ def get_flat_parameters(seeds,
                         save_to_file=False, 
                         dst='flat.npy'):
     """
+       TODO: extract automatically also the initial seeds, now it relies on a .npy
+        file taken directly from the real implementation.
        seeds:list, contains the seeds, as comma separated values, e.g. [1, 2, 3];
        ...
        dst:string, is the .npy file used to store the matrix.
@@ -47,9 +49,21 @@ def get_flat_parameters(seeds,
     noise = SharedNoiseTable(seed, count)  # initialize the noise matrix    
     v = np.zeros(shape=(number_seeds, parameters))
         
-    for i  in range(number_seeds):
+    for i in range(number_seeds):
         
-        v[i,:] = noise_stdev * noise.get(seeds[i], parameters)
+        if i == 0:
+            
+            x = np.array([])
+            tmp = np.load('seeds/initial_params_' + str(seeds[0]) + '.npy', allow_pickle=True) 
+            for t in tmp:
+                
+                x = np.concatenate((x, t.flatten()))
+            
+            v[i,:] = x
+                                    
+        else:
+        
+            v[i,:] = v[i-1,:] + noise_stdev * noise.get(seeds[i], parameters)
         
     if save_to_file:
         
