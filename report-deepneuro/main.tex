@@ -52,8 +52,8 @@
 
 \subsection{Details of the Neural Network Architecture}
 
-A neural networks is a directed graph where nodes are the \textit{placeholders} where the computation happens, while edges specify the parameters that are optimized during the training phase. Our model is trained on several Atari games: each $84x84x4$ gameframe is processed by the network and a move, out of the possible 18, is chosen. A "good move" is followed by a positive reward while a "bad move" may lead to a low reward or even a game over. To measure how good configuration of the network is good at playing a specific game, we measure the score when the game ends: the higher the score, the better the model. \\
-In our model two convolutional layers process the input gameframes (i.e. in the directed graph each input is locally connected to a portion of the nodes), then two dense layers (i.e. the directed graph is fully connected) are used to compute the game move. Figure 1.1 shows the neural network architecture. \\
+A neural networks is a directed graph where nodes are the \textit{placeholders} where the computation happens, while edges specify the parameters that are optimized during the training phase so the model becomes progressively better at a given task. The model we employ is trained to become competitive at playing Atari games: each $(84x84x4)$ gameframe is processed by the network and a move, out of the possible $18$, is chosen. A "good move" is followed by a positive reward while a "bad move" may lead to a low reward or even a game over. To measure how good configuration of the network is good at playing a specific game, we measure the score when the game ends: the higher the score, the better the model. \\
+In our network two convolutional layers process the input gameframes (i.e. in the directed graph each input is locally connected to a portion of the nodes), then two dense layers (i.e. the directed graph is fully connected) are used to compute the game move. Figure 1.1 shows the neural network architecture. \\
 
 \begin{figure}[h] % [h] forces the figure to be output where it is defined in the code (it suppresses floating)
 	\centering
@@ -116,5 +116,21 @@ The next figures show the evolution of the parameters of each layer (histograms)
 	\includegraphics[width=0.95\columnwidth]{hists_best_nets.png} % Example image
 	\caption{ Histogram of the networks' distribution by their scores.}
 \end{figure}
+
+\subsection{Next Steps}
+
+Da capitolo 8 (Weighted networks) Cumulative Distributions (vedi figura 10.1) di:
+
+\begin{itemize}
+	\item figure 7-8 dendogrammi receptive fields] 
+	\item link weights Q(w) vs w
+	\item link weights Q(w) vs w 
+	\item P(w) vs, w
+	\item Sigmaw vs <w>   media e standard deviation dei pesi 
+	\item P(k)  vs. k (Node strengths)  forse una misura laconica/farlocca (?!?) in questo caso ... 
+	\item P(s)  vs. s 
+	\item <s>(k) vs. k
+	\item <Y>(k) vs. k 
+\end{itemize}
 
 \end{document}
