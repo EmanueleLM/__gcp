@@ -73,6 +73,7 @@ def get_flat_parameters(seeds,
     else:
         
         return v
+    
 
 def get_adjacency_matrices(model,
                            flat_vector,
@@ -106,5 +107,5 @@ def get_adjacency_matrices(model,
         
     else:
         
-        return adj_matrices       
+        return adj_matrices
         

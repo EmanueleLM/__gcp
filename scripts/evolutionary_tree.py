@@ -9,7 +9,10 @@ import networkx as nx
 import matplotlib.pyplot as plt
 
 
-def draw_tree(src, dst, diff_gen=True, draw_labels=True):    
+def draw_tree(src, 
+              dst, 
+              diff_gen=True, 
+              draw_labels=True):    
     """
        src:string, must be in the format '/path/to/seeds_files/<name>', 
         where the file contains the lists of seeds of the element

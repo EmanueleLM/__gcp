@@ -62,12 +62,13 @@ for i in range(16):
 			fin_rec_field1[n:n+8,m:m+8,:,i] += fin_kernel1[:,:,:,i]
 
 for i in range(16):
-    plt.title('Initial receptive fields, nÂ°' + str(i))
-    plt.imshow(init_rec_field1[:,:,:,i])
+    plt.title('Initial receptive fields, n°' + str(i))
+    plt.imshow(init_rec_field1[:,:,:3,i])  # first 3 channels as RGB
     plt.pause(0.05)
-    plt.title('Final receptive fields, nÂ°' + str(i))
-    plt.imshow(fin_rec_field1[:,:,:,i])
+    plt.title('Final receptive fields, n°' + str(i))
+    plt.imshow(fin_rec_field1[:,:,:3,i])  # first 3 channels as RGB
     plt.pause(0.05)
+    print("Distance between receptive fields pre and post learning: ", np.linalg.norm(init_rec_field1[:,:,:3,i]-fin_rec_field1[:,:,:3,i]))
 plt.show()
 
 # second kernel extraction
@@ -81,10 +82,11 @@ for i in range(32):
 			fin_rec_field2[n:n+4,m:m+4,:,i] += fin_kernel2[:,:,:,i]
 				
 for i in range(32):
-    plt.title('Initial receptive fields, nÂ°' + str(i))
-    plt.imshow(init_rec_field2[:,:,:,i])
-    plt.pause(0.05)
-    plt.title('Final receptive fields, nÂ°' + str(i))
-    plt.imshow(fin_rec_field2[:,:,:,i])
-    plt.pause(0.05)
+    for j in range(0,16,4):
+        plt.title('Initial receptive fields, n°' + str(i))
+        plt.imshow(init_rec_field2[:,:,j:j+4,i])
+        plt.pause(0.05)
+        plt.title('Final receptive fields, n°' + str(i))
+        plt.imshow(fin_rec_field2[:,:,j:j+4,i])
+        plt.pause(0.05)
 plt.show()
