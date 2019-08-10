@@ -22,8 +22,6 @@ def get_weights_matrix(adj_matrices,
                      the layer is dense.
     """
     
-    # 1. DON'T FORGET THE BIASES!
-    # 2. USE A REPRESENTATION FOR EACH COUPLE OF CONSECUTIVE ADJ MATRICES
     assert len(adj_matrices) == len(strides), "Each adj matrix should have an entry in the conv list (int or None)."
     len_params = len(adj_matrices)
     
@@ -135,10 +133,3 @@ def get_weights_matrix(adj_matrices,
                 weights_strengths['i-l'+str(i+1)] += biases[i]
                 
     return weights_strengths
-
-
-# Run this snippet to evaluate the weights strength
-biases = (final_weights[1], final_weights[3], final_weights[5], final_weights[7])
-adj_matrices = (final_weights[0], final_weights[2], final_weights[4], final_weights[6])
-input_shapes = ((84, 84, 4), (21, 21, 16), (11,11,32), (3872), (256), (18))
-strides = (4, 2, None, None)
