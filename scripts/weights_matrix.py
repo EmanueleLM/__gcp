@@ -27,63 +27,118 @@ def get_weights_matrix(adj_matrices,
     assert len(adj_matrices) == len(strides), "Each adj matrix should have an entry in the conv list (int or None)."
     len_params = len(adj_matrices)
     
-    weights_matrices = {}
+    weights_strengths = {}
        
     for i in range(len_params):
-        
-        current_, next_ = adj_matrices[i], adj_matrices[i+1]
-        
-        if i == 0:  # initial layers needs to consider also the input nodes
+               
+        # first convolutional layer
+        if i == 0:  # in the initial layers we need to consider also the input nodes
             
-            current_ = np.sum(current_, axis=-1)
+            # input strengths
+            # reduce last dimension as it represents the number of filters
+            current_ = np.sum(adj_matrices[i], axis=-1)
             
-            s = (input_shapes[1][0]*input_shapes[1][1],  # 21x21
-                 input_shapes[0][0]*input_shapes[0][1],  # 84x84
+            s = (input_shapes[1][0]*input_shapes[1][1],  # 21x21, output
+                 input_shapes[0][0]*input_shapes[0][1],  # 84x84, input
                  input_shapes[0][2])  # 4 channels
             
             stride = strides[0]            
-            weights_matrices['0'] = np.zeros(shape=s)
-            print(weights_matrices['0'].shape)
+            weights_matrices = np.zeros(shape=s)
             
             for n in range(s[2]):
-                for i in range(s[1]):                        
+                for m in range(s[0]):                        
                     for j in range(current_.shape[0]):
                         
-                        print(i,j)
-                        offset = i*stride + j*input_shapes[0][0] + j*current_.shape[0]  # stride plus elements plus padding (to go to the next line) 
-                        print("-->", offset,offset+current_.shape[0])
-                        weights_matrices['0'][i,offset:offset+current_.shape[0],n] = current_[j,:,n]
-                            
-        elif i == len_params-1:  # last layer needs the output nodes also to be considered
+                        offset = m*stride + j*input_shapes[0][0] + j*current_.shape[0]  # stride plus elements plus padding (to go to the next line) 
+                        weights_matrices[m,offset:offset+current_.shape[0],n] = current_[j,:,n]
             
-            pass
-            
-        else:
+            weights_strengths['o-l0'] = np.sum(weights_matrices, axis=0).flatten()
 
-            pass            
-        
-        pass
-    
-    return weights_matrices
-    
-    
-def node_strength(matrix,
-                  conv=None):
-    """
-       Return a list with the strength of input and output nodes as defined at 
-       def. 10.3 chapter 10 Complex Networks by V. Latora et al.
-       Please note that the input is the adjacency matrix, not the weights matrix!
-    """
-    if conv == None:
-        
-        input_strengths = np.sum(matrix, axis=0)
-        output_strengths = np.sum(matrix, axis=1)
-        nodes_str = {'s_in_layer': input_strengths,
-                     's_out_layer': output_strengths}
-    
-    else:
-        
-        assert (conv >= 0 and type(conv) == int), "Conv parameter should be a positive integer"
-        pass
-    
-    return nodes_str
+            # output strengths
+            # reduce semi-last dimension as it represents the number of channels
+            current_ = np.sum(adj_matrices[i], axis=-2)
+            
+            s = (input_shapes[1][0]*input_shapes[1][1],  # 21x21, output
+                 input_shapes[0][0]*input_shapes[0][1],  # 84x84, input
+                 input_shapes[1][2])  # 16 filters
+            
+            stride = strides[0]            
+            weights_matrices = np.zeros(shape=s)
+            
+            for n in range(s[2]):
+                for m in range(s[0]):                        
+                    for j in range(current_.shape[0]):
+                        
+                        offset = m*stride + j*input_shapes[0][0] + j*current_.shape[0]  # stride plus elements plus padding (to go to the next line) 
+                        weights_matrices[m,offset:offset+current_.shape[0],n] = current_[j,:,n]
+   
+            if len(biases) >= i:                
+                weights_matrices = np.sum([weights_matrices, biases[i]], axis=-1)[0]
+                       
+            weights_strengths['i-l1'] = np.sum(weights_matrices, axis=1).flatten()
+                                
+        # second convolutional layer
+        if i == 1:
+            
+            # input strength
+            # reduce last dimension as it represents the number of kernels
+            current_ = np.sum(adj_matrices[i], axis=-1)
+            
+            s = (input_shapes[2][0]*input_shapes[2][1],  # 11x11, output
+                 input_shapes[1][0]*input_shapes[1][1],  # 21x21, input
+                 input_shapes[1][2])  # 16 channels
+                                   
+            stride = strides[1]            
+            weights_matrices = np.zeros(shape=s)
+            
+            for n in range(s[2]):
+                for m in range(s[0]):                        
+                    for j in range(current_.shape[0]):
+                        
+                        offset = m*stride + j*input_shapes[1][0] + j*current_.shape[0]  # stride plus elements plus padding (to go to the next line) 
+                        weights_matrices[m,offset:offset+current_.shape[0],n] = current_[j,:,n]           
+                        
+            weights_strengths['o-l1'] = np.sum(weights_matrices, axis=0).flatten()
+            
+            # output strengths
+            # reduce semi-last dimension as it represents the number of channels
+            current_ = np.sum(adj_matrices[i], axis=-2)
+            
+            s = (input_shapes[2][0]*input_shapes[2][1],  # 11x11, output
+                 input_shapes[0][0]*input_shapes[1][1],  # 21x21, input
+                 input_shapes[2][2])  # 32 filters
+            
+            stride = strides[0]            
+            weights_matrices = np.zeros(shape=s)
+            
+            for n in range(s[2]):
+                for m in range(s[0]):                        
+                    for j in range(current_.shape[0]):
+                        
+                        offset = m*stride + j*input_shapes[0][0] + j*current_.shape[0]  # stride plus elements plus padding (to go to the next line) 
+                        weights_matrices[m,offset:offset+current_.shape[0],n] = current_[j,:,n]
+            
+            if len(biases) >= i:                
+                weights_matrices = np.sum([weights_matrices, biases[i]], axis=-1)[0]
+                
+            weights_strengths['i-l2'] = np.sum(weights_matrices, axis=1).flatten()
+            
+        elif i == 2 or i == 3:  # dense layers are easy to manage
+            
+            # output current layer
+            weights_strengths['o-l'+str(i)] = np.sum(adj_matrices[i], axis=1).flatten()
+            # input current layer
+            weights_strengths['i-l'+str(i+1)] = np.sum(adj_matrices[i], axis=0).flatten()
+
+            # take into account output biases
+            if len(biases) >= i:
+                weights_strengths['i-l'+str(i+1)] += biases[i]
+                
+    return weights_strengths
+
+
+# Run this snippet to evaluate the weights strength
+biases = (final_weights[1], final_weights[3], final_weights[5], final_weights[7])
+adj_matrices = (final_weights[0], final_weights[2], final_weights[4], final_weights[6])
+input_shapes = ((84, 84, 4), (21, 21, 16), (11,11,32), (3872), (256), (18))
+strides = (4, 2, None, None)
