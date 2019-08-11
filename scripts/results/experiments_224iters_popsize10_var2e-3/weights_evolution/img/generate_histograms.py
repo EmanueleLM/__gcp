@@ -31,3 +31,22 @@ for i in range(8):
     plt.pause(0.05)
     print("Distance (norm) between two vectors is ", np.linalg.norm(init_weights[i].flatten()-fin_weights[i].flatten()))
 plt.show()
+
+# Calculate and plot for each weight Q(w) as the probability that another weight has
+#  a value higher than itself
+init_Q_w, fin_Q_w = np.array([]), np.array([])
+for w in init_weights:
+    init_Q_w = np.append(init_Q_w, np.zeros(w.flatten().shape))
+    fin_Q_w = np.append(fin_Q_w, np.zeros(w.flatten().shape))
+
+for i in range(len(init_weights)):
+    
+    tmp = init_weights[i].flatten()
+    len_w = len(tmp) 
+    init_Q_w = np.array([len(tmp[tmp>t])/len_w for t in tmp])
+    fin_Q_w = np.array([len(tmp[tmp>t])/len_w for t in tmp])
+    
+np.save('init_Q_w.npy', init_Q_w)
+np.save('fin_Q_w.npy', fin_Q_w)
+    
+    
