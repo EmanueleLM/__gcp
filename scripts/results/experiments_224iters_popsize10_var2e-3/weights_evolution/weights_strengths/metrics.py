@@ -46,12 +46,12 @@ weights_name = ['conv1', 'bconv1', 'conv2', 'bconv2', 'dense1', 'bdense1', 'dens
 weights_shapes = [(8, 8, 4, 16), (1, 1, 1, 16), (4, 4, 16, 32), (1, 1, 1, 32), (3872, 256), (256,), (256, 18), (18,)]
 
 # average the best 35 nets' parameters
-init_weights = np.load('../analysis_adj_fin0.npy', allow_pickle=True)
-fin_weights = np.load('../analysis_adj_fin0.npy', allow_pickle=True)
+init_weights = np.load('../IN_0-0.npy', allow_pickle=True)
+fin_weights = np.load('../BN_0-last.npy', allow_pickle=True)
 
 for i in range(1,35):
-    tmp1 = np.load('../analysis_adj_init'+str(i)+'.npy', allow_pickle=True)
-    tmp2 = np.load('../analysis_adj_fin'+str(i)+'.npy', allow_pickle=True)
+    tmp1 = np.load('../IN_'+str(i)+'-0.npy', allow_pickle=True)
+    tmp2 = np.load('../BN_'+str(i)+'-last.npy', allow_pickle=True)
     for j in range(8):
         init_weights[j] += tmp1[j]
         fin_weights[j] += tmp2[j]
@@ -59,6 +59,7 @@ for i in range(1,35):
 # average along the n best nets
 init_weights = np.array([tmp/35. for tmp in init_weights])
 fin_weights = np.array([tmp/35. for tmp in fin_weights])
+
 Qw_init, Qw_fin = [], []
 
 for i in range(len(init_weights)):
@@ -122,7 +123,7 @@ for i in range(8):
     plt.xlabel('Parameters values')
     plt.ylabel('Frequency')
     plt.legend(loc='upper right')
-    #plt.savefig('hist_'+weights_name[i]+'_Qw_init_vs_fin.png')
+    plt.savefig('hist_'+weights_name[i]+'_Qw_init_vs_fin.png')
     plt.pause(0.05)
     print("Distance (norm) between two vectors is ", np.linalg.norm(Qw_init[i].flatten()-Qw_fin[i].flatten()))
 plt.show()

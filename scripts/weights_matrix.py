@@ -19,7 +19,10 @@ def get_weights_matrix(adj_matrices,
         adj_matrices:list of parameters, excluded biases;
         biases:list, list of biases, an entry can be None if bias for a specific layer is not present;
         strides:list, specifies strides for each convolutional layer. An entry is None if
-                     the layer is dense.
+                     the layer is dense; 
+        input_shapes:list, list of input shapes i.e. the number of nodes in each layer. In our case
+                           the right vector is [(84,84,4), (21,21,16), (11,11,32), (3872), (256), (18)]
+                           even if the last three are not used (just the convs are needed).
     """
     
     assert len(adj_matrices) == len(strides), "Each adj matrix should have an entry in the conv list (int or None)."
