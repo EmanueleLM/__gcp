@@ -52,6 +52,42 @@ for i in init_s.keys():
     o += 1
 plt.show()
 
+# average strength <s>(k)
+# It is calculated as the sum of input strengths for nodes with degree equal to k,
+#  for k \in [min_degree, max_degree]
+s_k_init, s_k_fin = {}, {}
+s_k_init['l1'] = i_s.item().get('i-l1')
+s_k_init['l2'] = i_s.item().get('i-l2') 
+s_k_init['l3'] = i_s.item().get('i-l3') 
+s_k_init['l4'] = i_s.item().get('i-l4')
+s_k_fin['l1'] = f_s.item().get('i-l1') 
+s_k_fin['l2'] = f_s.item().get('i-l2') 
+s_k_fin['l3'] = f_s.item().get('i-l3') 
+s_k_fin['l4'] = f_s.item().get('i-l4')
+
+nodes_degrees = {'l1': 8*8*4, 'l2': 4*4*32, 'l3': 256, 'l4': 18}  # for each layer that admits s_input, assign it the k-degree
+colors = {'l1': 'red', 'l2': 'orange', 'l3': 'green', 'l4': 'blue'}
+
+for key in s_k_init.keys():
+    s_k_init[key] /= nodes_degrees[key]
+    s_k_fin[key] /= nodes_degrees[key]
+
+# plot <s>(k) of each layer: init strengths
+for key in s_k_init.keys():
+   plt.title('[<s>(k) vs k]: FIRST GENERATION')
+   x_ax = np.array([nodes_degrees[key] for _ in range(len(s_k_init[key]))])
+   plt.scatter(x_ax, s_k_init[key], color=colors[key], label=key)
+   plt.legend(loc='upper right')
+plt.show()
+
+# plot <s>(k) of each layer: fin strengths
+for key in s_k_init.keys():
+   plt.title('[<s>(k) vs k]: FIRST GENERATION')
+   x_ax = np.array([nodes_degrees[key] for _ in range(len(s_k_init[key]))])
+   plt.scatter(x_ax, s_k_fin[key], color=colors[key], label=key)
+   plt.legend(loc='upper right')
+plt.show()
+
 # Q(w) vs w of the best 35 networs (initial gen. vs. final gen.)
 weights_name = ['conv1', 'bconv1', 'conv2', 'bconv2', 'dense1', 'bdense1', 'dense2', 'bdense2']
 weights_shapes = [(8, 8, 4, 16), (1, 1, 1, 16), (4, 4, 16, 32), (1, 1, 1, 32), (3872, 256), (256,), (256, 18), (18,)]
