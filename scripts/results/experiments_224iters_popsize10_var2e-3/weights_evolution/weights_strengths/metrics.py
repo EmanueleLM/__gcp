@@ -12,6 +12,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
+weights_name = ['input', 'layer1_conv1', 'layer2_conv2', 'layer3_dense1', 'output_dense2']
+weights_shapes = [(8, 8, 4, 16), (1, 1, 1, 16), (4, 4, 16, 32), (1, 1, 1, 32), (3872, 256), (256,), (256, 18), (18,)]
+
 # weights strengths
 i_s = np.load('dict_init_strengths.npy', allow_pickle=True)
 f_s = np.load('dict_fin_strengths.npy', allow_pickle=True)
@@ -29,16 +32,24 @@ fin_s['l2'] = f_s.item().get('i-l2') + f_s.item().get('o-l2')
 fin_s['l3'] = f_s.item().get('i-l3') + f_s.item().get('o-l3')
 fin_s['l4'] = f_s.item().get('i-l4')
 
+o = 0
 for i in init_s.keys():
-    plt.title(i)
-    plt.hist(init_s[i].flatten(), bins=50, color='red', alpha=0.5, label='First Generation')
-    plt.hist(fin_s[i].flatten(), bins=50, color='blue', alpha=0.5, label='Last Generation')
-    plt.title(i)
+    plt.title("[NODES STRENGTHS FIRST GEN]: " + weights_name[o])
+    plt.hist(init_s[i].flatten(), bins=50, color='red', alpha=0.5, label='First Generation', normed=True)
     plt.xlabel('Parameters values')
     plt.ylabel('Frequency')
     plt.legend(loc='upper right')
+    plt.savefig('hist_nodes_strengths_init_'+weights_name[o]+'.svg')
+    plt.pause(0.05)
+    plt.hist(fin_s[i].flatten(), bins=50, color='blue', alpha=0.5, label='Last Generation', normed=True)
+    plt.title("[NODES STRENGTHS LAST GEN]: " + weights_name[o])
+    plt.xlabel('Parameters values')
+    plt.ylabel('Frequency')
+    plt.legend(loc='upper right')
+    plt.savefig('hist_nodes_strengths_fin_'+weights_name[o]+'.svg')
     plt.pause(0.05)
     print("Distance (norm) between two vectors is ", np.linalg.norm(fin_s[i].flatten()-init_s[i].flatten()))
+    o += 1
 plt.show()
 
 # Q(w) vs w of the best 35 networs (initial gen. vs. final gen.)
@@ -89,41 +100,37 @@ for i in range(8):
 Qw_init = np.asarray(tmp1)
 Qw_fin = np.asarray(tmp2)
 
-# scatterplot Q(w) vs w, inital and final, for each layer
+# (x,y)-plot Q(w) vs w, inital and final, for each layer
+Qw_init = np.load('init_Q_w.npy', allow_pickle=True)
+Qw_fin = np.load('fin_Q_w.npy', allow_pickle=True)
+
+colors = ['red', 'green', 'blue', 'black', 'yellow', 'green', 'brown', 'purple']
+
 # 1) initial
-for i in range(8):
-    
-   print(init_weights[i].shape, Qw_init[i].shape)
-   y_ax = np.array([i for i in range(len(Qw_init[i].flatten()))])
-   plt.title('[HISTOGRAM LAYER {}]: Q(w) vs w'.format(weights_name[i]))
-   plt.scatter(y_ax, init_weights[i].flatten(), color='red', alpha=0.5, label='w',)
-   plt.scatter(y_ax, Qw_init[i].flatten(), color='blue', alpha=0.5, label='Q(w)')
+for i in range(8): 
+   x, y = zip(*sorted(zip(init_weights[i].flatten(), Qw_init[i].flatten())))   
+   plt.title('[Q(w) vs w]: FIRST GENERATION')
+   plt.plot(x, y, color=colors[i], label=weights_name[i])
    plt.legend(loc='upper right')
-   plt.savefig('Qw_vs_w_init_'+weights_name[i]+'.png')
-   plt.pause(0.05)
+   plt.savefig('Qw_vs_w_init.png')
 plt.show()
 
 # 2) final
-for i in range(8):
-   print(init_weights[i].shape, Qw_init[i].shape)
-   y_ax = np.array([i for i in range(len(init_weights[i].flatten()))])
-   plt.title('[HISTOGRAM LAYER {}]: Q(w) vs w'.format(weights_name[i]))
-   plt.scatter(y_ax, fin_weights[i].flatten(), color='red', alpha=0.5, label='w')
-   plt.scatter(y_ax, Qw_fin[i].flatten(), color='blue', alpha=0.5, label='Q(w)')
+for i in range(8): 
+   x, y = zip(*sorted(zip(fin_weights[i].flatten(), Qw_fin[i].flatten())))   
+   plt.title('[Q(w) vs w]: FINAL GENERATION')
+   plt.plot(x, y, color=colors[i], label=weights_name[i])
    plt.legend(loc='upper right')
-   plt.pause(0.05)
-   plt.savefig('Qw_vs_w_fin_'+weights_name[i]+'.png')
+   plt.savefig('Qw_vs_w_fin.png')
 plt.show()
 
-# Q(w) initial vs. Q(w) final, histograms
+# Q(w) initial/final vs. w initial/final, every layer is plotted separately
 for i in range(8):
-    plt.title('[HISTOGRAM LAYER {}]: Q(w): initial vs. final'.format(weights_name[i]))
-    plt.hist(Qw_init[i].flatten(), bins=50, color='red', alpha=0.5, label='First Generation')
-    plt.hist(Qw_fin[i].flatten(), bins=50, color='blue', alpha=0.5, label='Last Generation')
-    plt.xlabel('Parameters values')
-    plt.ylabel('Frequency')
+    plt.title('[Q(w) vs w]: layer {}'.format(weights_name[i]))
+    x, y = zip(*sorted(zip(init_weights[i].flatten(), Qw_init[i].flatten())))   
+    plt.plot(x, y, label='Q(w) vs w initial', color='red')
+    x_, y_ = zip(*sorted(zip(fin_weights[i].flatten(), Qw_fin[i].flatten())))   
+    plt.plot(x_, y_, label='Q(w) vs w final', color='blue')
     plt.legend(loc='upper right')
-    plt.savefig('hist_'+weights_name[i]+'_Qw_init_vs_fin.png')
     plt.pause(0.05)
-    print("Distance (norm) between two vectors is ", np.linalg.norm(Qw_init[i].flatten()-Qw_fin[i].flatten()))
 plt.show()

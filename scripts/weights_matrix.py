@@ -23,6 +23,13 @@ def get_weights_matrix(adj_matrices,
         input_shapes:list, list of input shapes i.e. the number of nodes in each layer. In our case
                            the right vector is [(84,84,4), (21,21,16), (11,11,32), (3872), (256), (18)]
                            even if the last three are not used (just the convs are needed).
+    
+    Speedup:
+        1) load adj_matrix into variable (x = np.load(adj_filename, allow_pickle=True))
+        2) adj_matrices = [fin_weights[0], fin_weights[2], fin_weights[4], fin_weights[6]] 
+        3) biases = [fin_weights[1], fin_weights[3], fin_weights[5], fin_weights[7]]
+        4) strides = [4,2, None, None]
+        5) input_shapes = [(84,84,4), (21,21,16), (11,11,32), (3872), (256), (18)]
     """
     
     assert len(adj_matrices) == len(strides), "Each adj matrix should have an entry in the conv list (int or None)."
