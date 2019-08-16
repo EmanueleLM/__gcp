@@ -6,6 +6,12 @@ Created on Sat Aug 10 11:32:42 2019
 
 Extract metrics from a neural network graph as weights strengths from adjacency 
 matrices (initial vs. final), Q(w) vs. w etc.
+
+With this file you can extract, plot and save:
+    - Q(w) vs w
+    - <Y_i>
+    - <Y_i>(k) vs k
+    - s_in, s_out
 """
 
 import matplotlib.pyplot as plt
@@ -16,7 +22,7 @@ import tensorflow as tf
 weights_name = ['input', 'layer1_conv1', 'layer2_conv2', 'layer3_dense1', 'output_dense2']
 weights_shapes = [(8, 8, 4, 16), (1, 1, 1, 16), (4, 4, 16, 32), (1, 1, 1, 32), (3872, 256), (256,), (256, 18), (18,)]
 
-# weights strengths
+# Calculate, plot and save the weights strengths
 i_s = np.load('dict_init_strengths.npy', allow_pickle=True)
 f_s = np.load('dict_fin_strengths.npy', allow_pickle=True)
 
@@ -55,7 +61,7 @@ for i in init_s.keys():
     o += 1
 plt.show()
 
-# average strength <s>(k)
+# Calculate, plot and save the average strength <s>(k)
 # It is calculated as the sum of input strengths for nodes with degree equal to k,
 #  for k \in [min_degree, max_degree]
 s_k_init, s_k_fin = {}, {}
@@ -80,8 +86,8 @@ with tf.Session() as sess:
     
 nodes_degrees = {'l1': first_connectivity.flatten(), 
                  'l2': second_connectivity.flatten(),
-                 'l3': 256,
-                 'l4': 18}  # for each layer that admits s_input, assign it the k-degree
+                 'l3': 3872,
+                 'l4': 256}  # for each layer that admits s_input, assign it the k-degree
 colors = {'l1': 'red', 'l2': 'orange', 'l3': 'green', 'l4': 'blue'}
 
 for key in s_k_init.keys():
@@ -91,14 +97,15 @@ for key in s_k_init.keys():
 # plot <s>(k) of each layer: init strengths
 x_ax = {'l1': first_connectivity.flatten(), 
         'l2': second_connectivity.flatten(),
-        'l3': np.array([256 for _ in range(len(s_k_init['l3']))]),
-        'l4': np.array([18 for _ in range(len(s_k_init['l4']))])}
+        'l3': np.array([3872 for _ in range(len(s_k_init['l3']))]),
+        'l4': np.array([256 for _ in range(len(s_k_init['l4']))])}
 
 for key in s_k_init.keys():
    plt.title('[<s>(k) vs k]: FIRST GENERATION')
    plt.scatter(x_ax[key], s_k_init[key], color=colors[key], label=key)
    plt.legend(loc='upper right')
    plt.xlabel('k'); plt.ylabel('<s>(k)')
+   #plt.ylim(-0.025, 0.025)
    plt.savefig('s_k_vs_k_init.png')
    plt.savefig('s_k_vs_k_init.svg')
 plt.show()
@@ -109,9 +116,22 @@ for key in s_k_init.keys():
    plt.scatter(x_ax[key], s_k_fin[key], color=colors[key], label=key)
    plt.legend(loc='upper right')
    plt.xlabel('k'); plt.ylabel('<s>(k)')
+   #plt.ylim(-0.025, 0.025)
    plt.savefig('s_k_vs_k_fin.png')
    plt.savefig('s_k_vs_k_fin.svg')
 plt.show()
+
+# Calculate, plot and save <Y_i>(k) vs k, and for each k, compare it to the curve 1/k
+Y_i_init = np.load('Y_i_init.npy', allow_pickle=True)
+Y_i_fin = np.load('Y_i_fin.npy', allow_pickle=True)
+
+nodes_degrees = {'l1': first_connectivity.flatten(), 
+                 'l2': second_connectivity.flatten(),
+                 'l3': np.array([3872 for _ in range(len(s_k_init['l3']))]),
+                 'l4': np.array([256 for _ in range(len(s_k_init['l4']))])}  # for each layer that admits s_input, assign it the k-degree
+
+for key in Y_i_init.item().keys():
+    print(Y_i_init.item().get(key).shape)
 
 # Q(w) vs w of the best 35 networs (initial gen. vs. final gen.)
 weights_name = ['conv1', 'bconv1', 'conv2', 'bconv2', 'dense1', 'bdense1', 'dense2', 'bdense2']

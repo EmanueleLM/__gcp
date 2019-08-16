@@ -11,7 +11,8 @@ import numpy as np
 def get_weights_matrix(adj_matrices,
                        biases,
                        strides,
-                       input_shapes):
+                       input_shapes,
+                       compute_disparity=False):
     """
         Generate the weights matrix, given a series of adjacency matrices. For a formal
         definition of weights matrix, see def. 10.1, 10.2 chapter 10 Complex Networks
@@ -22,7 +23,9 @@ def get_weights_matrix(adj_matrices,
                      the layer is dense; 
         input_shapes:list, list of input shapes i.e. the number of nodes in each layer. In our case
                            the right vector is [(84,84,4), (21,21,16), (11,11,32), (3872), (256), (18)]
-                           even if the last three are not used (just the convs are needed).
+                           even if the last three are not used (just the convs are needed);
+        compute_disparity:boolean, if True, also the disparity matrix, for each node, is computed, as defined in
+                                   Complex Networks, def. 10.4 chapter 10.
     
     Speedup:
         1) load adj_matrix into variable (x = np.load(adj_filename, allow_pickle=True))
@@ -36,6 +39,7 @@ def get_weights_matrix(adj_matrices,
     len_params = len(adj_matrices)
     
     weights_strengths = {}
+    nodes_disparity = {}  # initialize it in any case
        
     for i in range(len_params):
                
@@ -82,8 +86,14 @@ def get_weights_matrix(adj_matrices,
    
             if len(biases) >= i:                
                 weights_matrices = np.sum([weights_matrices, biases[i]], axis=-1)[0]
-                       
+                                       
             weights_strengths['i-l1'] = np.sum(weights_matrices, axis=1).flatten()
+            
+            if compute_disparity is True:
+                
+                w_in_squared = np.sum(weights_matrices**2, axis=1).flatten()
+                squared_si = np.sum(weights_matrices, axis=1).flatten()**2
+                nodes_disparity['i-l1'] = w_in_squared / squared_si
                                 
         # second convolutional layer
         if i == 1:
@@ -131,6 +141,12 @@ def get_weights_matrix(adj_matrices,
                 
             weights_strengths['i-l2'] = np.sum(weights_matrices, axis=1).flatten()
             
+            if compute_disparity is True:
+                
+                w_in_squared = np.sum(weights_matrices**2, axis=1).flatten()
+                squared_si = np.sum(weights_matrices, axis=1).flatten()**2
+                nodes_disparity['i-l2'] = w_in_squared / squared_si
+            
         elif i == 2 or i == 3:  # dense layers are easy to manage
             
             # output current layer
@@ -142,4 +158,17 @@ def get_weights_matrix(adj_matrices,
             if len(biases) >= i:
                 weights_strengths['i-l'+str(i+1)] += biases[i]
                 
-    return weights_strengths
+            if compute_disparity is True:
+                
+                w_in_squared = np.sum(adj_matrices[i]**2, axis=0).flatten()
+                squared_si = np.sum(adj_matrices[i], axis=0).flatten()**2
+                nodes_disparity['i-l'+str(i+1)] = w_in_squared / squared_si
+    
+    # return strengths and eventually nodes'disparity
+    if compute_disparity is True:
+      
+        return weights_strengths, nodes_disparity
+    
+    else:
+    
+        return weights_strengths
