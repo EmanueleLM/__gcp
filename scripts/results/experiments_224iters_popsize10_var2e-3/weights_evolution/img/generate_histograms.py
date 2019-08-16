@@ -9,8 +9,8 @@ init_weights = np.load('IN_0-0.npy', allow_pickle=True)
 fin_weights = np.load('BN_0-last.npy', allow_pickle=True)
 
 for i in range(1,35):
-    tmp1 = np.load('IN_0-'+str(i)+'-0.npy', allow_pickle=True)
-    tmp2 = np.load('BN_0-'+str(i)+'-last.npy', allow_pickle=True)
+    tmp1 = np.load('IN_'+str(i)+'-0.npy', allow_pickle=True)
+    tmp2 = np.load('BN_'+str(i)+'-last.npy', allow_pickle=True)
     for j in range(8):
         init_weights[j] += tmp1[j]
         fin_weights[j] += tmp2[j]

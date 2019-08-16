@@ -44,7 +44,7 @@ def get_weights_matrix(adj_matrices,
             
             # input strengths
             # reduce last dimension as it represents the number of filters
-            current_ = np.sum(adj_matrices[i], axis=-1)
+            current_ = np.sum(adj_matrices[i], axis=-1)  # 8x8x4x16 -> 8x8x4
             
             s = (input_shapes[1][0]*input_shapes[1][1],  # 21x21, output
                  input_shapes[0][0]*input_shapes[0][1],  # 84x84, input
@@ -57,7 +57,7 @@ def get_weights_matrix(adj_matrices,
                 for m in range(s[0]):                        
                     for j in range(current_.shape[0]):
                         
-                        offset = m*stride + j*input_shapes[0][0] + j*current_.shape[0]  # stride plus elements plus padding (to go to the next line) 
+                        offset = m*stride + j*input_shapes[0][0]
                         weights_matrices[m,offset:offset+current_.shape[0],n] = current_[j,:,n]
             
             weights_strengths['o-l0'] = np.sum(weights_matrices, axis=0).flatten()
@@ -77,7 +77,7 @@ def get_weights_matrix(adj_matrices,
                 for m in range(s[0]):                        
                     for j in range(current_.shape[0]):
                         
-                        offset = m*stride + j*input_shapes[0][0] + j*current_.shape[0]  # stride plus elements plus padding (to go to the next line) 
+                        offset = m*stride + j*input_shapes[0][0]  # stride plus elements plus padding (to go to the next line) 
                         weights_matrices[m,offset:offset+current_.shape[0],n] = current_[j,:,n]
    
             if len(biases) >= i:                
@@ -103,7 +103,7 @@ def get_weights_matrix(adj_matrices,
                 for m in range(s[0]):                        
                     for j in range(current_.shape[0]):
                         
-                        offset = m*stride + j*input_shapes[1][0] + j*current_.shape[0]  # stride plus elements plus padding (to go to the next line) 
+                        offset = m*stride + j*input_shapes[1][0]  # stride plus elements plus padding (to go to the next line) 
                         weights_matrices[m,offset:offset+current_.shape[0],n] = current_[j,:,n]           
                         
             weights_strengths['o-l1'] = np.sum(weights_matrices, axis=0).flatten()
@@ -123,7 +123,7 @@ def get_weights_matrix(adj_matrices,
                 for m in range(s[0]):                        
                     for j in range(current_.shape[0]):
                         
-                        offset = m*stride + j*input_shapes[0][0] + j*current_.shape[0]  # stride plus elements plus padding (to go to the next line) 
+                        offset = m*stride + j*input_shapes[0][0]  # stride plus elements plus padding (to go to the next line) 
                         weights_matrices[m,offset:offset+current_.shape[0],n] = current_[j,:,n]
             
             if len(biases) >= i:                

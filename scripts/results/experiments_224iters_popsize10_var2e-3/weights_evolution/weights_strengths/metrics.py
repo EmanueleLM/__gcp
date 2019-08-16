@@ -10,6 +10,7 @@ matrices (initial vs. final), Q(w) vs. w etc.
 
 import matplotlib.pyplot as plt
 import numpy as np
+import tensorflow as tf
 
 
 weights_name = ['input', 'layer1_conv1', 'layer2_conv2', 'layer3_dense1', 'output_dense2']
@@ -36,17 +37,19 @@ o = 0
 for i in init_s.keys():
     plt.title("[NODES STRENGTHS FIRST GEN]: " + weights_name[o])
     plt.hist(init_s[i].flatten(), bins=50, color='red', alpha=0.5, label='First Generation', normed=True)
-    plt.xlabel('Parameters values')
-    plt.ylabel('Frequency')
+    plt.xlabel('[VALUES]: s_out + s_in')
+    plt.ylabel('[FREQUENCY]: s_out + s_in')
     plt.legend(loc='upper right')
     plt.savefig('hist_nodes_strengths_init_'+weights_name[o]+'.svg')
+    plt.savefig('hist_nodes_strengths_init_'+weights_name[o]+'.png')
     plt.pause(0.05)
     plt.hist(fin_s[i].flatten(), bins=50, color='blue', alpha=0.5, label='Last Generation', normed=True)
     plt.title("[NODES STRENGTHS LAST GEN]: " + weights_name[o])
-    plt.xlabel('Parameters values')
-    plt.ylabel('Frequency')
+    plt.xlabel('[VALUES]: s_out + s_in')
+    plt.ylabel('[FREQUENCY]: s_out + s_in')
     plt.legend(loc='upper right')
     plt.savefig('hist_nodes_strengths_fin_'+weights_name[o]+'.svg')
+    plt.savefig('hist_nodes_strengths_fin_'+weights_name[o]+'.png')
     plt.pause(0.05)
     print("Distance (norm) between two vectors is ", np.linalg.norm(fin_s[i].flatten()-init_s[i].flatten()))
     o += 1
@@ -65,27 +68,49 @@ s_k_fin['l2'] = f_s.item().get('i-l2')
 s_k_fin['l3'] = f_s.item().get('i-l3') 
 s_k_fin['l4'] = f_s.item().get('i-l4')
 
-nodes_degrees = {'l1': 8*8*4, 'l2': 4*4*32, 'l3': 256, 'l4': 18}  # for each layer that admits s_input, assign it the k-degree
+# calculate the nodes connections during the two convolutions
+i1, i2 = np.ones(shape=(1, 84, 84, 4)), np.ones(shape=(1,21,21,16))
+k1, k2 = np.ones(shape=(8,8,4,16)), np.ones(shape=(4,4,16,32))
+s1, s2 = [1,4,4,1], [1,2,2,1]
+conv1 = tf.nn.conv2d(i1, k1, strides=s1, padding="SAME")
+conv2 = tf.nn.conv2d(i2, k2, strides=s2, padding="SAME" )
+with tf.Session() as sess:
+    first_connectivity = sess.run(conv1)
+    second_connectivity = sess.run(conv2)
+    
+nodes_degrees = {'l1': first_connectivity.flatten(), 
+                 'l2': second_connectivity.flatten(),
+                 'l3': 256,
+                 'l4': 18}  # for each layer that admits s_input, assign it the k-degree
 colors = {'l1': 'red', 'l2': 'orange', 'l3': 'green', 'l4': 'blue'}
 
 for key in s_k_init.keys():
     s_k_init[key] /= nodes_degrees[key]
     s_k_fin[key] /= nodes_degrees[key]
-
+    
 # plot <s>(k) of each layer: init strengths
+x_ax = {'l1': first_connectivity.flatten(), 
+        'l2': second_connectivity.flatten(),
+        'l3': np.array([256 for _ in range(len(s_k_init['l3']))]),
+        'l4': np.array([18 for _ in range(len(s_k_init['l4']))])}
+
 for key in s_k_init.keys():
    plt.title('[<s>(k) vs k]: FIRST GENERATION')
-   x_ax = np.array([nodes_degrees[key] for _ in range(len(s_k_init[key]))])
-   plt.scatter(x_ax, s_k_init[key], color=colors[key], label=key)
+   plt.scatter(x_ax[key], s_k_init[key], color=colors[key], label=key)
    plt.legend(loc='upper right')
+   plt.xlabel('k'); plt.ylabel('<s>(k)')
+   plt.savefig('s_k_vs_k_init.png')
+   plt.savefig('s_k_vs_k_init.svg')
 plt.show()
 
 # plot <s>(k) of each layer: fin strengths
 for key in s_k_init.keys():
-   plt.title('[<s>(k) vs k]: FIRST GENERATION')
-   x_ax = np.array([nodes_degrees[key] for _ in range(len(s_k_init[key]))])
-   plt.scatter(x_ax, s_k_fin[key], color=colors[key], label=key)
+   plt.title('[<s>(k) vs k]: LAST GENERATION')
+   plt.scatter(x_ax[key], s_k_fin[key], color=colors[key], label=key)
    plt.legend(loc='upper right')
+   plt.xlabel('k'); plt.ylabel('<s>(k)')
+   plt.savefig('s_k_vs_k_fin.png')
+   plt.savefig('s_k_vs_k_fin.svg')
 plt.show()
 
 # Q(w) vs w of the best 35 networs (initial gen. vs. final gen.)
