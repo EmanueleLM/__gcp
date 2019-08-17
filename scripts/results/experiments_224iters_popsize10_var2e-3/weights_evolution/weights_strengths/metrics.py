@@ -22,7 +22,7 @@ import tensorflow as tf
 weights_name = ['input', 'layer1_conv1', 'layer2_conv2', 'layer3_dense1', 'output_dense2']
 weights_shapes = [(8, 8, 4, 16), (1, 1, 1, 16), (4, 4, 16, 32), (1, 1, 1, 32), (3872, 256), (256,), (256, 18), (18,)]
 
-# Calculate, plot and save the weights strengths
+# Calculate, plot and save the weights strengths, i.e. s_in, s_out and their sum
 i_s = np.load('dict_init_strengths.npy', allow_pickle=True)
 f_s = np.load('dict_fin_strengths.npy', allow_pickle=True)
 
@@ -64,6 +64,7 @@ plt.show()
 # Calculate, plot and save the average strength <s>(k)
 # It is calculated as the sum of input strengths for nodes with degree equal to k,
 #  for k \in [min_degree, max_degree]
+# Calculate, plot and save the weights strengths, i.e. s_in, s_out and their sum
 s_k_init, s_k_fin = {}, {}
 s_k_init['l1'] = i_s.item().get('i-l1')
 s_k_init['l2'] = i_s.item().get('i-l2') 
@@ -83,7 +84,14 @@ conv2 = tf.nn.conv2d(i2, k2, strides=s2, padding="SAME" )
 with tf.Session() as sess:
     first_connectivity = sess.run(conv1)
     second_connectivity = sess.run(conv2)
-    
+
+first_connectivity = np.pad(first_connectivity, ((0,0), (2,2), (2,2), (0,0)), 'edge')
+
+# check if the numbers make sense
+assert first_connectivity.shape == (1, 25, 25, 16), "Convolution for the first layer must match with connectivity shape"
+assert second_connectivity.shape == (1, 11, 11, 32), "Convolution for the second given layer must match with connectivity shape"
+
+# node degrees is the number of arcs (i.e. weights) that 'feed' a node
 nodes_degrees = {'l1': first_connectivity.flatten(), 
                  'l2': second_connectivity.flatten(),
                  'l3': 3872,
@@ -103,9 +111,10 @@ x_ax = {'l1': first_connectivity.flatten(),
 for key in s_k_init.keys():
    plt.title('[<s>(k) vs k]: FIRST GENERATION')
    plt.scatter(x_ax[key], s_k_init[key], color=colors[key], label=key)
+   plt.xscale('log')
    plt.legend(loc='upper right')
    plt.xlabel('k'); plt.ylabel('<s>(k)')
-   #plt.ylim(-0.025, 0.025)
+   #plt.ylim(-3., 3.)
    plt.savefig('s_k_vs_k_init.png')
    plt.savefig('s_k_vs_k_init.svg')
 plt.show()
@@ -114,24 +123,63 @@ plt.show()
 for key in s_k_init.keys():
    plt.title('[<s>(k) vs k]: LAST GENERATION')
    plt.scatter(x_ax[key], s_k_fin[key], color=colors[key], label=key)
+   plt.xscale('log')
    plt.legend(loc='upper right')
-   plt.xlabel('k'); plt.ylabel('<s>(k)')
-   #plt.ylim(-0.025, 0.025)
+   plt.xlabel('k'); plt.ylabel('<s>(k)')   
+   #plt.ylim(-3., 3.)
    plt.savefig('s_k_vs_k_fin.png')
    plt.savefig('s_k_vs_k_fin.svg')
 plt.show()
 
-# Calculate, plot and save <Y_i>(k) vs k, and for each k, compare it to the curve 1/k
-Y_i_init = np.load('Y_i_init.npy', allow_pickle=True)
-Y_i_fin = np.load('Y_i_fin.npy', allow_pickle=True)
+# Calculate, plot and save <Y_i>(k) vs k, and for each indegree k, compare it to the curve 1/k
+i_s_squared = np.load('dict_init_squared_strengths.npy', allow_pickle=True)
+f_s_squared = np.load('dict_fin_squared_strengths.npy', allow_pickle=True)
 
-nodes_degrees = {'l1': first_connectivity.flatten(), 
-                 'l2': second_connectivity.flatten(),
-                 'l3': np.array([3872 for _ in range(len(s_k_init['l3']))]),
-                 'l4': np.array([256 for _ in range(len(s_k_init['l4']))])}  # for each layer that admits s_input, assign it the k-degree
+Yi_init = {}
+Yi_fin = {}
+Yi_init['i-l1'] = i_s_squared.item().get('i-l1') / (i_s.item().get('i-l1') + i_s.item().get('o-l1'))**2
+Yi_init['i-l2'] = i_s_squared.item().get('i-l2') / (i_s.item().get('i-l2') + i_s.item().get('o-l2'))**2
+Yi_init['i-l3'] = i_s_squared.item().get('i-l3') / (i_s.item().get('i-l3') + i_s.item().get('o-l3'))**2
+Yi_init['i-l4'] = i_s_squared.item().get('i-l4') / i_s.item().get('i-l4')**2
+Yi_fin['i-l1'] = f_s_squared.item().get('i-l1') / (f_s.item().get('i-l1') + f_s.item().get('o-l1'))**2
+Yi_fin['i-l2'] = f_s_squared.item().get('i-l2') / (f_s.item().get('i-l2') + f_s.item().get('o-l2'))**2
+Yi_fin['i-l3'] = f_s_squared.item().get('i-l3') / (f_s.item().get('i-l3') + f_s.item().get('o-l3'))**2
+Yi_fin['i-l4'] = f_s_squared.item().get('i-l4') / f_s.item().get('i-l4')**2
 
-for key in Y_i_init.item().keys():
-    print(Y_i_init.item().get(key).shape)
+nodes_degrees = {'i-l1': first_connectivity.flatten(), 
+                 'i-l2': second_connectivity.flatten(),
+                 'i-l3': np.array([3872 for _ in range(len(s_k_init['l3']))]),
+                 'i-l4': np.array([256 for _ in range(len(s_k_init['l4']))])}  # for each layer that admits s_input, assign it the k-degree
+
+Y_i_init_flatten, Y_i_fin_flatten = np.array([]), np.array([])
+degrees = np.array([])
+for key in Yi_init.keys():
+    Y_i_init_flatten = np.append(Y_i_init_flatten, Yi_init[key].flatten())
+    Y_i_fin_flatten = np.append(Y_i_fin_flatten, Yi_fin[key].flatten())
+    degrees = np.append(degrees, nodes_degrees[key].flatten())
+
+Y_k_init, Y_k_fin = {}, {}
+for unique_k in np.sort(np.unique(degrees)):
+    where_is_k = np.argwhere(degrees==unique_k)
+    Y_k_init[str(unique_k)] = Y_i_init_flatten[where_is_k]
+    Y_k_fin[str(unique_k)] = Y_i_fin_flatten[where_is_k]
+    
+# plot <Y>(k) vs k init
+for key in Y_k_init.keys(): 
+   x = np.array([int(float(key)) for _ in range(len(Y_k_init[key]))])   
+   plt.title('[<Y>(k) vs k]: FIRST GENERATION')
+   plt.scatter(x, Y_k_init[key])
+   plt.legend(loc='upper right')
+plt.show()
+
+# plot <Y>(k) vs k fin
+for key in Y_k_fin.keys(): 
+   x = np.array([int(float(key)) for _ in range(len(Y_k_fin[key]))])   
+   plt.title('[<Y>(k) vs k]: FIRST GENERATION')
+   plt.scatter(x, Y_k_fin[key])
+   plt.legend(loc='upper right')
+plt.show()
+    
 
 # Q(w) vs w of the best 35 networs (initial gen. vs. final gen.)
 weights_name = ['conv1', 'bconv1', 'conv2', 'bconv2', 'dense1', 'bdense1', 'dense2', 'bdense2']

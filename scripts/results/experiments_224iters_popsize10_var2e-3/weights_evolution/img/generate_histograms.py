@@ -39,8 +39,7 @@ for w in init_weights:
     init_Q_w = np.append(init_Q_w, np.zeros(w.flatten().shape))
     fin_Q_w = np.append(fin_Q_w, np.zeros(w.flatten().shape))
 
-for i in range(len(init_weights)):
-    
+for i in range(len(init_weights)):    
     tmp = init_weights[i].flatten()
     len_w = len(tmp) 
     init_Q_w = np.array([len(tmp[tmp>t])/len_w for t in tmp])
