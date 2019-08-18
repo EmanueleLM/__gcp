@@ -16,7 +16,6 @@ With this file you can extract, plot and save:
 
 import matplotlib.pyplot as plt
 import numpy as np
-import tensorflow as tf
 
 
 weights_name = ['input', 'layer1_conv1', 'layer2_conv2', 'layer3_dense1', 'output_dense2']
@@ -75,43 +74,31 @@ s_k_fin['l2'] = f_s.item().get('i-l2')
 s_k_fin['l3'] = f_s.item().get('i-l3') 
 s_k_fin['l4'] = f_s.item().get('i-l4')
 
-# calculate the nodes connections during the two convolutions
-i1, i2 = np.ones(shape=(1, 84, 84, 4)), np.ones(shape=(1,21,21,16))
-k1, k2 = np.ones(shape=(8,8,4,16)), np.ones(shape=(4,4,16,32))
-s1, s2 = [1,4,4,1], [1,2,2,1]
-conv1 = tf.nn.conv2d(i1, k1, strides=s1, padding="SAME")
-conv2 = tf.nn.conv2d(i2, k2, strides=s2, padding="SAME" )
-with tf.Session() as sess:
-    first_connectivity = sess.run(conv1)
-    second_connectivity = sess.run(conv2)
+# extrapolate the nodes connections during the two convolutions
+card_i_s = np.load('dict_init_cardinality.npy', allow_pickle=True)
+card_f_s = np.load('dict_fin_cardinality.npy', allow_pickle=True)
 
-first_connectivity = np.pad(first_connectivity, ((0,0), (2,2), (2,2), (0,0)), 'edge')
+card_init, card_fin = {}, {}
+card_init['l1'] = card_i_s.item().get('i-l1').flatten()
+card_init['l2'] = card_i_s.item().get('i-l2').flatten()
+card_init['l3'] = card_i_s.item().get('i-l3').flatten()
+card_init['l4'] = card_i_s.item().get('i-l4').flatten()
+card_fin['l1'] = card_f_s.item().get('i-l1').flatten()
+card_fin['l2'] = card_f_s.item().get('i-l2').flatten()
+card_fin['l3'] = card_f_s.item().get('i-l3').flatten()
+card_fin['l4'] = card_f_s.item().get('i-l4').flatten()
 
-# check if the numbers make sense
-assert first_connectivity.shape == (1, 25, 25, 16), "Convolution for the first layer must match with connectivity shape"
-assert second_connectivity.shape == (1, 11, 11, 32), "Convolution for the second given layer must match with connectivity shape"
-
-# node degrees is the number of arcs (i.e. weights) that 'feed' a node
-nodes_degrees = {'l1': first_connectivity.flatten(), 
-                 'l2': second_connectivity.flatten(),
-                 'l3': 3872,
-                 'l4': 256}  # for each layer that admits s_input, assign it the k-degree
 colors = {'l1': 'red', 'l2': 'orange', 'l3': 'green', 'l4': 'blue'}
 
 for key in s_k_init.keys():
-    s_k_init[key] /= nodes_degrees[key]
-    s_k_fin[key] /= nodes_degrees[key]
+    s_k_init[key] /= card_init[key]
+    s_k_fin[key] /= card_fin[key]
     
 # plot <s>(k) of each layer: init strengths
-x_ax = {'l1': first_connectivity.flatten(), 
-        'l2': second_connectivity.flatten(),
-        'l3': np.array([3872 for _ in range(len(s_k_init['l3']))]),
-        'l4': np.array([256 for _ in range(len(s_k_init['l4']))])}
-
 for key in s_k_init.keys():
    plt.title('[<s>(k) vs k]: FIRST GENERATION')
-   plt.scatter(x_ax[key], s_k_init[key], color=colors[key], label=key)
-   plt.xscale('log')
+   plt.scatter(card_init[key], s_k_init[key], color=colors[key], label=key)
+   #plt.xscale('log')
    plt.legend(loc='upper right')
    plt.xlabel('k'); plt.ylabel('<s>(k)')
    #plt.ylim(-3., 3.)
@@ -122,8 +109,8 @@ plt.show()
 # plot <s>(k) of each layer: fin strengths
 for key in s_k_init.keys():
    plt.title('[<s>(k) vs k]: LAST GENERATION')
-   plt.scatter(x_ax[key], s_k_fin[key], color=colors[key], label=key)
-   plt.xscale('log')
+   plt.scatter(card_fin[key], s_k_fin[key], color=colors[key], label=key)
+   #plt.xscale('log')
    plt.legend(loc='upper right')
    plt.xlabel('k'); plt.ylabel('<s>(k)')   
    #plt.ylim(-3., 3.)
