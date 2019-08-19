@@ -91,14 +91,14 @@ card_fin['l4'] = card_f_s.item().get('i-l4').flatten()
 colors = {'l1': 'red', 'l2': 'orange', 'l3': 'green', 'l4': 'blue'}
 
 for key in s_k_init.keys():
-    s_k_init[key] /= card_init[key]
-    s_k_fin[key] /= card_fin[key]
+    s_k_init[key] /= len(card_init[key])
+    s_k_fin[key] /= len(card_fin[key])
     
 # plot <s>(k) of each layer: init strengths
 for key in s_k_init.keys():
    plt.title('[<s>(k) vs k]: FIRST GENERATION')
    plt.scatter(card_init[key], s_k_init[key], color=colors[key], label=key)
-   #plt.xscale('log')
+   plt.xscale('log')
    plt.legend(loc='upper right')
    plt.xlabel('k'); plt.ylabel('<s>(k)')
    #plt.ylim(-3., 3.)
@@ -110,7 +110,7 @@ plt.show()
 for key in s_k_init.keys():
    plt.title('[<s>(k) vs k]: LAST GENERATION')
    plt.scatter(card_fin[key], s_k_fin[key], color=colors[key], label=key)
-   #plt.xscale('log')
+   plt.xscale('log')
    plt.legend(loc='upper right')
    plt.xlabel('k'); plt.ylabel('<s>(k)')   
    #plt.ylim(-3., 3.)
@@ -133,10 +133,15 @@ Yi_fin['i-l2'] = f_s_squared.item().get('i-l2') / (f_s.item().get('i-l2') + f_s.
 Yi_fin['i-l3'] = f_s_squared.item().get('i-l3') / (f_s.item().get('i-l3') + f_s.item().get('o-l3'))**2
 Yi_fin['i-l4'] = f_s_squared.item().get('i-l4') / f_s.item().get('i-l4')**2
 
-nodes_degrees = {'i-l1': first_connectivity.flatten(), 
-                 'i-l2': second_connectivity.flatten(),
-                 'i-l3': np.array([3872 for _ in range(len(s_k_init['l3']))]),
-                 'i-l4': np.array([256 for _ in range(len(s_k_init['l4']))])}  # for each layer that admits s_input, assign it the k-degree
+e1, len1 = card_i_s.item().get('i-l1').flatten()[0], len(card_i_s.item().get('i-l1').flatten())
+e2, len2 = card_i_s.item().get('i-l2').flatten()[0], len(card_i_s.item().get('i-l2').flatten())
+e3, len3 = card_i_s.item().get('i-l3').flatten()[0], len(card_i_s.item().get('i-l3').flatten())
+e4, len4 = card_i_s.item().get('i-l4').flatten()[0], len(card_i_s.item().get('i-l4').flatten())
+
+nodes_degrees = {'i-l1': np.array([ e1 for _ in range(len1)]), 
+                 'i-l2': np.array([ e2 for _ in range(len2)]),
+                 'i-l3': np.array([ e3 for _ in range(len3)]),
+                 'i-l4': np.array([ e4 for _ in range(len4)])}  # for each layer that admits s_input, assign it the k-degree
 
 Y_i_init_flatten, Y_i_fin_flatten = np.array([]), np.array([])
 degrees = np.array([])

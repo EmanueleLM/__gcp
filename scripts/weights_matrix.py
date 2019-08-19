@@ -35,7 +35,7 @@ def get_weights_matrix(adj_matrices,
         biases = [fin_weights[1], fin_weights[3], fin_weights[5], fin_weights[7]]
         strides = [4,2, None, None]
         input_shapes = [(84,84,4), (21,21,16), (11,11,32), (3872), (256), (18)]
-        input_padded = [(89,89,4), (25,25,16), (11,11,32), (3872), (256), (18)]
+        input_padded = [(88,88,4), (25,25,16), (11,11,32), (3872), (256), (18)]
         fin = get_weights_matrix(adj_matrices,
                                biases,
                                strides,
@@ -86,7 +86,7 @@ def get_weights_matrix(adj_matrices,
                  input_shapes[0][2])  # 4 channels
             
             stride = strides[0]     
-            one = np.ones(shape=(current_.shape[0]))  # used to calculate node connectivity
+            one = np.ones(shape=(current_.shape[0]))
             weights_matrices = np.zeros(shape=s)
             nodes_connectivity = np.zeros(shape=s)
             
@@ -105,23 +105,22 @@ def get_weights_matrix(adj_matrices,
                                                         input_padded[0][0],
                                                         input_padded[0][1],
                                                         input_shapes[0][2])
-            
+                                    
             nodes_connectivity = nodes_connectivity.reshape(input_shapes[1][0]*input_shapes[1][1],
                                                             input_padded[0][0],
                                                             input_padded[0][1],
                                                             input_shapes[0][2])
             
             # remove padding
+            weights_matrices = weights_matrices[:,2:-2,2:-2,:]  # leave out 2 pixel per side: 88x88x4 -> 84x84x4
             weights_matrices = np.sum(weights_matrices, axis=0)
-            weights_matrices = weights_matrices.reshape(*input_padded[i])
-            weights_matrices = weights_matrices[2:-2,2:-2,:]  # 88x88x4 -> 84x84x4
-            
+ 
+            nodes_connectivity = nodes_connectivity[:,2:-2,2:-2,:]  # leave out 2 pixel per side: 88x88x4 -> 84x84x4            
             nodes_connectivity = np.sum(nodes_connectivity, axis=0)
-            nodes_connectivity = nodes_connectivity.reshape(*input_padded[i])
-            nodes_connectivity = nodes_connectivity[2:-2,2:-2,:]  # 88x88x4 -> 84x84x4
-            
+            nodes_connectivity += input_shapes[1][2]  # add one entry for each single kernel used on the image!
+                        
             weights_strengths['o-l0'] = weights_matrices.flatten()
-            nodes_cardinality['o-l0'] = nodes_connectivity        
+            nodes_cardinality['o-l0'] = nodes_connectivity.flatten()  
             
 
             # output strengths
@@ -134,6 +133,7 @@ def get_weights_matrix(adj_matrices,
             
             weights_matrices = np.zeros(shape=s)
             nodes_connectivity = np.zeros(shape=s)
+            one = input_shapes[0][2]*np.ones(shape=(current_.shape[0]))  # !(note the multiplication): used to calculate node connectivity
             
             for n in range(s[2]):
                 for a in range(input_shapes[1][0]):
@@ -148,13 +148,10 @@ def get_weights_matrix(adj_matrices,
 
             if len(biases) >= i:                
                 weights_matrices = np.sum([weights_matrices, biases[i]], axis=-1)[0]
-                nodes_connectivity += 1  # every input node receives a bias as input
-                
-                        
-            # no need to remove padding as the padded axes is summed up
+            
             weights_strengths['i-l1'] = np.sum(weights_matrices, axis=1).flatten()
-            nodes_cardinality['i-l1'] = np.sum(nodes_connectivity, axis=1).reshape(input_shapes[1][0],input_shapes[1][1],input_shapes[1][2])
-                                            
+            nodes_cardinality['i-l1'] = np.sum(nodes_connectivity, axis=1).reshape(input_shapes[1][0],input_shapes[1][1],input_shapes[1][2]).flatten() 
+                
         # second convolutional layer
         if i == 1:
             
@@ -180,20 +177,28 @@ def get_weights_matrix(adj_matrices,
                         for j in range(current_.shape[0]):
                             offset += (input_padded[1][0] if j!=0 else 0)  # offset for each entry in the 8x8 matrix
                             weights_matrices[(a*input_shapes[2][0]) + b, offset:offset+current_.shape[0], n] = current_[j,:,n]
-                            nodes_connectivity[(a*input_shapes[2][0]) + b, offset:offset+current_.shape[0], n] += one                        
-
+                            nodes_connectivity[(a*input_shapes[2][0]) + b, offset:offset+current_.shape[0], n] += one
+            
+            weights_matrices = weights_matrices.reshape(input_shapes[2][0]*input_shapes[2][1],
+                                                        input_padded[1][0],
+                                                        input_padded[1][1],
+                                                        input_shapes[1][2])
+                                    
+            nodes_connectivity = nodes_connectivity.reshape(input_shapes[2][0]*input_shapes[2][1],
+                                                            input_padded[1][0],
+                                                            input_padded[1][1],
+                                                            input_shapes[1][2])
+            
             # remove padding
-            # remove padding
+            weights_matrices = weights_matrices[:,2:-2,2:-2,:]  # leave out 2 pixel per side: 25x25x16 -> 21x21x16
             weights_matrices = np.sum(weights_matrices, axis=0)
-            weights_matrices = weights_matrices.reshape(*input_padded[i])
-            weights_matrices = weights_matrices[2:-2,2:-2,:]  # 88x88x4 -> 84x84x4
             
+            nodes_connectivity = nodes_connectivity[:,2:-2,2:-2,:]  # leave out 2 pixel per side: 25x25x16 -> 21x21x16
             nodes_connectivity = np.sum(nodes_connectivity, axis=0)
-            nodes_connectivity = nodes_connectivity.reshape(*input_padded[i])
-            nodes_connectivity = nodes_connectivity[2:-2,2:-2,:]  # 88x88x4 -> 84x84x4
-            
+            nodes_connectivity += input_shapes[2][2]  # add one entry for each single kernel used on the image!
+
             weights_strengths['o-l1'] = weights_matrices.flatten()
-            nodes_cardinality['o-l1'] = nodes_connectivity  
+            nodes_cardinality['o-l1'] = nodes_connectivity.flatten() 
             
             # output strengths
             # reduce semi-last dimension as it represents the number of channels
@@ -221,12 +226,11 @@ def get_weights_matrix(adj_matrices,
             
             if len(biases) >= i:                
                 weights_matrices = np.sum([weights_matrices, biases[i]], axis=-1)[0]
-                nodes_connectivity += 1  # every input node receives a bias as input
 
             # no need to remove padding
             # no need to remove padding as the padded axes is summed up
             weights_strengths['i-l2'] = np.sum(weights_matrices, axis=1).flatten()
-            nodes_cardinality['i-l2'] = np.sum(nodes_connectivity, axis=1).reshape(input_shapes[2][0],input_shapes[2][1],input_shapes[2][2])
+            nodes_cardinality['i-l2'] = np.sum(nodes_connectivity, axis=1).reshape(input_shapes[2][0],input_shapes[2][1],input_shapes[2][2]).flatten()
             
         elif i == 2 or i == 3:  # dense layers are easy to manage
             
@@ -238,7 +242,7 @@ def get_weights_matrix(adj_matrices,
             # take into account output biases
             if len(biases) >= i:
                 weights_strengths['i-l'+str(i+1)] += biases[i]                
-                nodes_cardinality['o-l'+str(i)] = np.array([adj_matrices[i].shape[1]+1 for _ in range(adj_matrices[i].shape[0])])
+                nodes_cardinality['o-l'+str(i)] = np.array([adj_matrices[i].shape[1] for _ in range(adj_matrices[i].shape[0])])
                 nodes_cardinality['i-l'+str(i+1)] = np.array([adj_matrices[i].shape[0]+1 for _ in range(adj_matrices[i].shape[1])])
             
             else:                
