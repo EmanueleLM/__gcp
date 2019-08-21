@@ -53,8 +53,8 @@ for i in init_s.keys():
     plt.xlabel('[VALUES]: s_out + s_in')
     plt.ylabel('[FREQUENCY]: s_out + s_in')
     plt.legend(loc='upper right')
-    plt.savefig('hist_nodes_strengths_fin_'+weights_name[o]+'.svg')
-    plt.savefig('hist_nodes_strengths_fin_'+weights_name[o]+'.png')
+    #plt.savefig('hist_nodes_strengths_fin_'+weights_name[o]+'.svg')
+    #plt.savefig('hist_nodes_strengths_fin_'+weights_name[o]+'.png')
     plt.pause(0.05)
     print("Distance (norm) between two vectors is ", np.linalg.norm(fin_s[i].flatten()-init_s[i].flatten()))
     o += 1
@@ -65,13 +65,13 @@ plt.show()
 #  for k \in [min_degree, max_degree]
 # Calculate, plot and save the weights strengths, i.e. s_in, s_out and their sum
 s_k_init, s_k_fin = {}, {}
-s_k_init['l1'] = i_s.item().get('i-l1')
-s_k_init['l2'] = i_s.item().get('i-l2') 
-s_k_init['l3'] = i_s.item().get('i-l3') 
+s_k_init['l1'] = i_s.item().get('i-l1') + i_s.item().get('o-l1')  
+s_k_init['l2'] = i_s.item().get('i-l2') + i_s.item().get('o-l2')
+s_k_init['l3'] = i_s.item().get('i-l3') + i_s.item().get('o-l3')
 s_k_init['l4'] = i_s.item().get('i-l4')
-s_k_fin['l1'] = f_s.item().get('i-l1') 
-s_k_fin['l2'] = f_s.item().get('i-l2') 
-s_k_fin['l3'] = f_s.item().get('i-l3') 
+s_k_fin['l1'] = f_s.item().get('i-l1')  + i_s.item().get('o-l1')
+s_k_fin['l2'] = f_s.item().get('i-l2')  + i_s.item().get('o-l2')
+s_k_fin['l3'] = f_s.item().get('i-l3')  + i_s.item().get('o-l3')
 s_k_fin['l4'] = f_s.item().get('i-l4')
 
 # extrapolate the nodes connections during the two convolutions
@@ -79,14 +79,14 @@ card_i_s = np.load('dict_init_cardinality.npy', allow_pickle=True)
 card_f_s = np.load('dict_fin_cardinality.npy', allow_pickle=True)
 
 card_init, card_fin = {}, {}
-card_init['l1'] = card_i_s.item().get('i-l1').flatten()
-card_init['l2'] = card_i_s.item().get('i-l2').flatten()
-card_init['l3'] = card_i_s.item().get('i-l3').flatten()
-card_init['l4'] = card_i_s.item().get('i-l4').flatten()
-card_fin['l1'] = card_f_s.item().get('i-l1').flatten()
-card_fin['l2'] = card_f_s.item().get('i-l2').flatten()
-card_fin['l3'] = card_f_s.item().get('i-l3').flatten()
-card_fin['l4'] = card_f_s.item().get('i-l4').flatten()
+card_init['l1'] = card_i_s.item().get('i-l1').flatten() + card_i_s.item().get('o-l1').flatten() +1  # bias edge
+card_init['l2'] = card_i_s.item().get('i-l2').flatten() + card_i_s.item().get('o-l2').flatten() +1
+card_init['l3'] = card_i_s.item().get('i-l3').flatten() + card_i_s.item().get('o-l3').flatten()
+card_init['l4'] = card_i_s.item().get('i-l4').flatten() +1  # bias and output edge, but bias has already taken into account
+card_fin['l1'] = card_f_s.item().get('i-l1').flatten() + card_i_s.item().get('o-l1').flatten() +1  # bias edge
+card_fin['l2'] = card_f_s.item().get('i-l2').flatten() + card_i_s.item().get('o-l2').flatten() +1
+card_fin['l3'] = card_f_s.item().get('i-l3').flatten() + card_i_s.item().get('o-l3').flatten()
+card_fin['l4'] = card_f_s.item().get('i-l4').flatten() +1  # bias and output edge, but bias has already taken into account
 
 colors = {'l1': 'red', 'l2': 'orange', 'l3': 'green', 'l4': 'blue'}
 
@@ -99,11 +99,11 @@ for key in s_k_init.keys():
    plt.title('[<s>(k) vs k]: FIRST GENERATION')
    plt.scatter(card_init[key], s_k_init[key], color=colors[key], label=key)
    plt.xscale('log')
-   plt.legend(loc='upper right')
+   plt.legend(loc='best')
    plt.xlabel('k'); plt.ylabel('<s>(k)')
-   #plt.ylim(-3., 3.)
-   plt.savefig('s_k_vs_k_init.png')
-   plt.savefig('s_k_vs_k_init.svg')
+   #plt.ylim(-0.08, 0.08)
+   #plt.savefig('s_k_vs_k_init.png')
+   #plt.savefig('s_k_vs_k_init.svg')
 plt.show()
 
 # plot <s>(k) of each layer: fin strengths
@@ -111,11 +111,11 @@ for key in s_k_init.keys():
    plt.title('[<s>(k) vs k]: LAST GENERATION')
    plt.scatter(card_fin[key], s_k_fin[key], color=colors[key], label=key)
    plt.xscale('log')
-   plt.legend(loc='upper right')
+   plt.legend(loc='best')
    plt.xlabel('k'); plt.ylabel('<s>(k)')   
-   #plt.ylim(-3., 3.)
-   plt.savefig('s_k_vs_k_fin.png')
-   plt.savefig('s_k_vs_k_fin.svg')
+   #plt.ylim(-0.08, 0.08)
+   #plt.savefig('s_k_vs_k_fin.png')
+   #plt.savefig('s_k_vs_k_fin.svg')
 plt.show()
 
 # Calculate, plot and save <Y_i>(k) vs k, and for each indegree k, compare it to the curve 1/k
@@ -124,31 +124,35 @@ f_s_squared = np.load('dict_fin_squared_strengths.npy', allow_pickle=True)
 
 Yi_init = {}
 Yi_fin = {}
-Yi_init['i-l1'] = i_s_squared.item().get('i-l1') / (i_s.item().get('i-l1') + i_s.item().get('o-l1'))**2
-Yi_init['i-l2'] = i_s_squared.item().get('i-l2') / (i_s.item().get('i-l2') + i_s.item().get('o-l2'))**2
-Yi_init['i-l3'] = i_s_squared.item().get('i-l3') / (i_s.item().get('i-l3') + i_s.item().get('o-l3'))**2
-Yi_init['i-l4'] = i_s_squared.item().get('i-l4') / i_s.item().get('i-l4')**2
-Yi_fin['i-l1'] = f_s_squared.item().get('i-l1') / (f_s.item().get('i-l1') + f_s.item().get('o-l1'))**2
-Yi_fin['i-l2'] = f_s_squared.item().get('i-l2') / (f_s.item().get('i-l2') + f_s.item().get('o-l2'))**2
-Yi_fin['i-l3'] = f_s_squared.item().get('i-l3') / (f_s.item().get('i-l3') + f_s.item().get('o-l3'))**2
-Yi_fin['i-l4'] = f_s_squared.item().get('i-l4') / f_s.item().get('i-l4')**2
+Yi_init['i-l1'] = i_s_squared.item().get('i-l1') + i_s_squared.item().get('o-l1')
+Yi_init['i-l1'] /= (i_s.item().get('i-l1') + i_s.item().get('o-l1'))**2
+Yi_init['i-l2'] = i_s_squared.item().get('i-l2') + i_s_squared.item().get('o-l2') 
+Yi_init['i-l2'] /= (i_s.item().get('i-l2') + i_s.item().get('o-l2'))**2
+Yi_init['i-l3'] = i_s_squared.item().get('i-l3') + i_s_squared.item().get('o-l3') 
+Yi_init['i-l3'] /= (i_s.item().get('i-l3') + i_s.item().get('o-l3'))**2
+Yi_init['i-l4'] = i_s_squared.item().get('i-l4')
+Yi_init['i-l4'] /= (i_s.item().get('i-l4'))**2
 
-e1, len1 = card_i_s.item().get('i-l1').flatten()[0], len(card_i_s.item().get('i-l1').flatten())
-e2, len2 = card_i_s.item().get('i-l2').flatten()[0], len(card_i_s.item().get('i-l2').flatten())
-e3, len3 = card_i_s.item().get('i-l3').flatten()[0], len(card_i_s.item().get('i-l3').flatten())
-e4, len4 = card_i_s.item().get('i-l4').flatten()[0], len(card_i_s.item().get('i-l4').flatten())
+Yi_fin['i-l1'] = f_s_squared.item().get('i-l1') + f_s_squared.item().get('o-l1')
+Yi_fin['i-l1'] /= (f_s.item().get('i-l1') + f_s.item().get('o-l1'))**2
+Yi_fin['i-l2'] = f_s_squared.item().get('i-l2') + f_s_squared.item().get('o-l2') 
+Yi_fin['i-l2'] /= (f_s.item().get('i-l2') + f_s.item().get('o-l2'))**2
+Yi_fin['i-l3'] = f_s_squared.item().get('i-l3') + f_s_squared.item().get('o-l3') 
+Yi_fin['i-l3'] /= (f_s.item().get('i-l3') + f_s.item().get('o-l3'))**2
+Yi_fin['i-l4'] = f_s_squared.item().get('i-l4')
+Yi_fin['i-l4'] /= (f_s.item().get('i-l4'))**2
 
-nodes_degrees = {'i-l1': np.array([ e1 for _ in range(len1)]), 
-                 'i-l2': np.array([ e2 for _ in range(len2)]),
-                 'i-l3': np.array([ e3 for _ in range(len3)]),
-                 'i-l4': np.array([ e4 for _ in range(len4)])}  # for each layer that admits s_input, assign it the k-degree
+nodes_degrees = {}
+for key in card_init.keys():
+    e_ = max(card_init[key].flatten())
+    nodes_degrees[key] = card_init[key]
 
 Y_i_init_flatten, Y_i_fin_flatten = np.array([]), np.array([])
 degrees = np.array([])
 for key in Yi_init.keys():
     Y_i_init_flatten = np.append(Y_i_init_flatten, Yi_init[key].flatten())
     Y_i_fin_flatten = np.append(Y_i_fin_flatten, Yi_fin[key].flatten())
-    degrees = np.append(degrees, nodes_degrees[key].flatten())
+    degrees = np.append(degrees, nodes_degrees[key.split('-')[-1]].flatten())
 
 Y_k_init, Y_k_fin = {}, {}
 for unique_k in np.sort(np.unique(degrees)):
@@ -162,6 +166,7 @@ for key in Y_k_init.keys():
    plt.title('[<Y>(k) vs k]: FIRST GENERATION')
    plt.scatter(x, Y_k_init[key])
    plt.legend(loc='upper right')
+   plt.pause(0.05)
 plt.show()
 
 # plot <Y>(k) vs k fin
@@ -170,6 +175,7 @@ for key in Y_k_fin.keys():
    plt.title('[<Y>(k) vs k]: FIRST GENERATION')
    plt.scatter(x, Y_k_fin[key])
    plt.legend(loc='upper right')
+   plt.pause(0.05)
 plt.show()
     
 
