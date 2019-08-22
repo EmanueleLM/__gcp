@@ -235,7 +235,7 @@ def get_weights_matrix(adj_matrices,
             weights_strengths['o-l'+str(i)] = np.sum(adj_matrices[i], axis=1).flatten()
             # input current layer
             weights_strengths['i-l'+str(i+1)] = np.sum(adj_matrices[i], axis=0).flatten()
-
+            
             # take into account output biases
             if len(biases) >= i:
                 weights_strengths['i-l'+str(i+1)] += biases[i]                

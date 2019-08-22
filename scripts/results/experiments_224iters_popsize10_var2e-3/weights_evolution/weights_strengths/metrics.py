@@ -53,8 +53,8 @@ for i in init_s.keys():
     plt.xlabel('[VALUES]: s_out + s_in')
     plt.ylabel('[FREQUENCY]: s_out + s_in')
     plt.legend(loc='upper right')
-    #plt.savefig('hist_nodes_strengths_fin_'+weights_name[o]+'.svg')
-    #plt.savefig('hist_nodes_strengths_fin_'+weights_name[o]+'.png')
+    plt.savefig('hist_nodes_strengths_fin_'+weights_name[o]+'.svg')
+    plt.savefig('hist_nodes_strengths_fin_'+weights_name[o]+'.png')
     plt.pause(0.05)
     print("Distance (norm) between two vectors is ", np.linalg.norm(fin_s[i].flatten()-init_s[i].flatten()))
     o += 1
@@ -102,8 +102,8 @@ for key in s_k_init.keys():
    plt.legend(loc='best')
    plt.xlabel('k'); plt.ylabel('<s>(k)')
    #plt.ylim(-0.08, 0.08)
-   #plt.savefig('s_k_vs_k_init.png')
-   #plt.savefig('s_k_vs_k_init.svg')
+   plt.savefig('s_k_vs_k_init.png')
+   plt.savefig('s_k_vs_k_init.svg')
 plt.show()
 
 # plot <s>(k) of each layer: fin strengths
@@ -114,8 +114,8 @@ for key in s_k_init.keys():
    plt.legend(loc='best')
    plt.xlabel('k'); plt.ylabel('<s>(k)')   
    #plt.ylim(-0.08, 0.08)
-   #plt.savefig('s_k_vs_k_fin.png')
-   #plt.savefig('s_k_vs_k_fin.svg')
+   plt.savefig('s_k_vs_k_fin.png')
+   plt.savefig('s_k_vs_k_fin.svg')
 plt.show()
 
 # Calculate, plot and save <Y_i>(k) vs k, and for each indegree k, compare it to the curve 1/k
@@ -124,27 +124,26 @@ f_s_squared = np.load('dict_fin_squared_strengths.npy', allow_pickle=True)
 
 Yi_init = {}
 Yi_fin = {}
-Yi_init['i-l1'] = i_s_squared.item().get('i-l1') + i_s_squared.item().get('o-l1')
+Yi_init['i-l1'] = i_s_squared.item().get('i-l1')
 Yi_init['i-l1'] /= (i_s.item().get('i-l1') + i_s.item().get('o-l1'))**2
-Yi_init['i-l2'] = i_s_squared.item().get('i-l2') + i_s_squared.item().get('o-l2') 
+Yi_init['i-l2'] = i_s_squared.item().get('i-l2') 
 Yi_init['i-l2'] /= (i_s.item().get('i-l2') + i_s.item().get('o-l2'))**2
-Yi_init['i-l3'] = i_s_squared.item().get('i-l3') + i_s_squared.item().get('o-l3') 
+Yi_init['i-l3'] = i_s_squared.item().get('i-l3') 
 Yi_init['i-l3'] /= (i_s.item().get('i-l3') + i_s.item().get('o-l3'))**2
 Yi_init['i-l4'] = i_s_squared.item().get('i-l4')
-Yi_init['i-l4'] /= (i_s.item().get('i-l4'))**2
+Yi_init['i-l4'] /= (i_s.item().get('i-l4') +1)**2  # output strength is 1
 
-Yi_fin['i-l1'] = f_s_squared.item().get('i-l1') + f_s_squared.item().get('o-l1')
+Yi_fin['i-l1'] = f_s_squared.item().get('i-l1') 
 Yi_fin['i-l1'] /= (f_s.item().get('i-l1') + f_s.item().get('o-l1'))**2
-Yi_fin['i-l2'] = f_s_squared.item().get('i-l2') + f_s_squared.item().get('o-l2') 
+Yi_fin['i-l2'] = f_s_squared.item().get('i-l2')
 Yi_fin['i-l2'] /= (f_s.item().get('i-l2') + f_s.item().get('o-l2'))**2
-Yi_fin['i-l3'] = f_s_squared.item().get('i-l3') + f_s_squared.item().get('o-l3') 
+Yi_fin['i-l3'] = f_s_squared.item().get('i-l3') +1  # output strength is 1
 Yi_fin['i-l3'] /= (f_s.item().get('i-l3') + f_s.item().get('o-l3'))**2
 Yi_fin['i-l4'] = f_s_squared.item().get('i-l4')
-Yi_fin['i-l4'] /= (f_s.item().get('i-l4'))**2
+Yi_fin['i-l4'] /= (f_s.item().get('i-l4') +1)**2  # output strength is 1
 
 nodes_degrees = {}
 for key in card_init.keys():
-    e_ = max(card_init[key].flatten())
     nodes_degrees[key] = card_init[key]
 
 Y_i_init_flatten, Y_i_fin_flatten = np.array([]), np.array([])
@@ -157,25 +156,24 @@ for key in Yi_init.keys():
 Y_k_init, Y_k_fin = {}, {}
 for unique_k in np.sort(np.unique(degrees)):
     where_is_k = np.argwhere(degrees==unique_k)
-    Y_k_init[str(unique_k)] = Y_i_init_flatten[where_is_k]
-    Y_k_fin[str(unique_k)] = Y_i_fin_flatten[where_is_k]
+    Y_k_init[str(unique_k)] = np.average(Y_i_init_flatten[where_is_k])
+    Y_k_fin[str(unique_k)] = np.average(Y_i_fin_flatten[where_is_k])
     
 # plot <Y>(k) vs k init
-for key in Y_k_init.keys(): 
-   x = np.array([int(float(key)) for _ in range(len(Y_k_init[key]))])   
+cols = ['red', 'orange', 'green', 'blue', 'black', 'grey']
+for (key, c) in zip(Y_k_init.keys(), cols): 
+   x_ax = float(key)   
    plt.title('[<Y>(k) vs k]: FIRST GENERATION')
-   plt.scatter(x, Y_k_init[key])
+   plt.scatter(x_ax, Y_k_init[key], color=c, label='k='+key)
    plt.legend(loc='upper right')
-   plt.pause(0.05)
 plt.show()
 
 # plot <Y>(k) vs k fin
 for key in Y_k_fin.keys(): 
-   x = np.array([int(float(key)) for _ in range(len(Y_k_fin[key]))])   
+   x_ax = float(key)   
    plt.title('[<Y>(k) vs k]: FIRST GENERATION')
-   plt.scatter(x, Y_k_fin[key])
+   plt.scatter(x_ax, Y_k_fin[key])
    plt.legend(loc='upper right')
-   plt.pause(0.05)
 plt.show()
     
 
