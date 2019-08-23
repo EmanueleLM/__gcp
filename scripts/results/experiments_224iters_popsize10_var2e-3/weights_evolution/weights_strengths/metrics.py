@@ -101,9 +101,9 @@ for key in s_k_init.keys():
    plt.xscale('log')
    plt.legend(loc='best')
    plt.xlabel('k'); plt.ylabel('<s>(k)')
-   #plt.ylim(-0.08, 0.08)
-   plt.savefig('s_k_vs_k_init.png')
-   plt.savefig('s_k_vs_k_init.svg')
+   plt.ylim(0., 0.4)
+   plt.savefig('s_k_vs_k_init_samescale.png')
+   plt.savefig('s_k_vs_k_init_samescale.svg')
 plt.show()
 
 # plot <s>(k) of each layer: fin strengths
@@ -113,9 +113,9 @@ for key in s_k_init.keys():
    plt.xscale('log')
    plt.legend(loc='best')
    plt.xlabel('k'); plt.ylabel('<s>(k)')   
-   #plt.ylim(-0.08, 0.08)
-   plt.savefig('s_k_vs_k_fin.png')
-   plt.savefig('s_k_vs_k_fin.svg')
+   plt.ylim(0., 0.4)
+   plt.savefig('s_k_vs_k_fin_samescale.png')
+   plt.savefig('s_k_vs_k_fin_samescale.svg')
 plt.show()
 
 # Calculate, plot and save <Y_i>(k) vs k, and for each indegree k, compare it to the curve 1/k
@@ -164,16 +164,24 @@ cols = ['red', 'orange', 'green', 'blue', 'black', 'grey']
 for (key, c) in zip(Y_k_init.keys(), cols): 
    x_ax = float(key)   
    plt.title('[<Y>(k) vs k]: FIRST GENERATION')
-   plt.scatter(x_ax, Y_k_init[key], color=c, label='k='+key)
-   plt.legend(loc='upper right')
+   plt.xscale('log')
+   plt.ylim(0., 0.12)
+   plt.scatter(x_ax, Y_k_init[key], color=c, label='k='+str(int(float(key))))
+   plt.legend(loc='best')
+   plt.savefig('Y_k_vs_k_init_samescale.png')
+   plt.savefig('Y_k_vs_k_init_samescale.svg')
 plt.show()
 
 # plot <Y>(k) vs k fin
-for key in Y_k_fin.keys(): 
+for (key, c) in zip(Y_k_init.keys(), cols): 
    x_ax = float(key)   
-   plt.title('[<Y>(k) vs k]: FIRST GENERATION')
-   plt.scatter(x_ax, Y_k_fin[key])
-   plt.legend(loc='upper right')
+   plt.title('[<Y>(k) vs k]: LAST GENERATION')
+   plt.xscale('log')
+   plt.ylim(0., 0.12)
+   plt.scatter(x_ax, Y_k_fin[key], color=c, label='k='+str(int(float(key))))
+   plt.legend(loc='best')
+   plt.savefig('Y_k_vs_fin_samescale.png')
+   plt.savefig('Y_k_vs_k_fin_samescale.svg')  
 plt.show()
     
 
