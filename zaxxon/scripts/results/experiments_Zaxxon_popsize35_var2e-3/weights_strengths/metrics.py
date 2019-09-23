@@ -183,7 +183,39 @@ for (key, c) in zip(Y_k_init.keys(), cols):
    plt.savefig('Y_k_vs_fin_samescale.png')
    plt.savefig('Y_k_vs_k_fin_samescale.svg')  
 plt.show()
-    
+
+# pk vs k metric: The degree distribution of an undirected graph is defined as: pk = Nk/N
+card = np.load('dict_init_cardinality.npy', allow_pickle=True)
+
+card_init = {}
+card_init['l1'] = card.item().get('i-l1').flatten() + card.item().get('o-l1').flatten() +1  # bias edge
+card_init['l2'] = card.item().get('i-l2').flatten() + card.item().get('o-l2').flatten() +1
+card_init['l3'] = card.item().get('i-l3').flatten() + card.item().get('o-l3').flatten()
+card_init['l4'] = card.item().get('i-l4').flatten() +1  # bias and output edge, but bias has already taken into account
+
+N = np.sum([Nk.shape[0] for Nk in card_init.values()])
+Pk, K, layer = list(), list(), list()
+# extract total number of links per node
+for key in card_init.keys():
+    for k in np.unique(card_init[key]):
+        K.append(k)
+        Pk.append(len(np.argwhere(card_init[key]==k))/N)
+        layer.append(key)
+
+cols = ['red', 'orange', 'green', 'blue', 'black', 'grey']
+label = [l + ': ' + str(k) for (l, k) in zip(layer, K)]
+fig, ax = plt.subplots()
+for (x, y, l, c) in zip(K, Pk, label, cols):
+    plt.xscale('log')
+    ax.scatter(x, y, c=c, label=l)
+
+plt.legend(loc='best')
+plt.title('[P_k vs k]: FIRST GENERATION')
+plt.xlabel('k')
+plt.ylabel('P(k)')
+plt.savefig('P_k_vs_init.png')
+plt.savefig('P_k_vs_k_init.svg')  
+plt.show() 
 
 # Q(w) vs w of the best 35 networs (initial gen. vs. final gen.)
 weights_name = ['conv1', 'bconv1', 'conv2', 'bconv2', 'dense1', 'bdense1', 'dense2', 'bdense2']
