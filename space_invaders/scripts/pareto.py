@@ -49,6 +49,6 @@ def pareto_frontier(src_scores, src_episodes_length, remove_outliers=None, maxX=
     plt.title('[PARETO FRONT]: Space Invaders')
     plt.ylabel("Score")
     plt.xlabel("Episode length")
-    plt.legend(['Pareto front'], loc='upper left')
+    plt.legend(['Pareto front'], loc='best')
     plt.show()
         
