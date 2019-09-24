@@ -12,6 +12,10 @@ With this file you can extract, plot and save:
     - <Y_i>
     - <Y_i>(k) vs k
     - s_in, s_out
+    - Pk vs k
+It is also possible to normalize the weights before calculating the various metric by applying 
+ some normalizations techinques as in module normalization.py inside each folder that starts with
+ '__normalization..'.
 """
 
 import matplotlib.pyplot as plt
