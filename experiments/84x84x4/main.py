@@ -22,7 +22,7 @@ from utils.normalize import normalize_01
 if __name__ == '__main__':
     
     # this is the only entry point you should touch in this file
-    json_config = 'config/venture.json'
+    json_config = 'config/private_eye.json'
     json_data = json.load(open(json_config))
     
     name_flat_file = json_data['name_flat_file']
