@@ -255,7 +255,7 @@ def cumulative_link_weights(Qw_init, Qw_fin, init_weights, fin_weights, dst, sho
         Plot Q(w) vs w, i.e the cumulative distribution of the link weights
     """
     
-    import matplotli.pyplot as plt
+    import matplotlib.pyplot as plt
     
     weights_name = ['conv1', 'bconv1', 'conv2', 'bconv2', 'dense1', 'bdense1', 'dense2', 'bdense2']    
     
@@ -269,11 +269,12 @@ def cumulative_link_weights(Qw_init, Qw_fin, init_weights, fin_weights, dst, sho
        plt.legend(loc='best')
        plt.savefig(dst + 'Qw_vs_w_init.png')
 
-    if show == True:
-        plt.show()
-    else:
-        pass 
-    
+       if show == True:
+           plt.show()
+       else:
+           pass
+        
+        
     # 2) final
     for i in range(8): 
        x, y = zip(*sorted(zip(fin_weights[i].flatten(), Qw_fin[i].flatten())))   
@@ -282,8 +283,8 @@ def cumulative_link_weights(Qw_init, Qw_fin, init_weights, fin_weights, dst, sho
        plt.legend(loc='best')
        plt.savefig(dst + 'Qw_vs_w_fin.png')
 
-    if show == True:
-        plt.show()
-    else:
-        pass 
-    
+       if show == True:
+           plt.show()
+       else:
+           pass
+            

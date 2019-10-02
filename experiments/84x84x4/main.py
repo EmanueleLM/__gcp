@@ -185,13 +185,13 @@ if __name__ == '__main__':
     print("\n[CUSTOM-LOGGER]: Calculate, plot and save Pk vs k metric.")
     card = np.load(json_data['metrics_path'] + 'dict_init_cardinality.npy', allow_pickle=True)
     degrees_distribution(card, dst=json_data['metrics_path'] + 'Pk_vs_k/', show=True)
+    
 
-    """
     # Calculate, plot and save the cumulative link weights
     print("\n[CUSTOM-LOGGER]: Calculate, plot and save Q(w) vs w.")
     print("[CUSTOM-LOGGER]: Please take care that this calculation may require hours!")
-    Qw(init_weights, fin_weights, dst=json_data['metrics_path'])
+    Qw(init_weights, fin_weights, num_parameters, dst=json_data['metrics_path'])
     Qw_init = np.load(json_data['metrics_path'] + 'init_Q_w.npy', allow_pickle=True)
     Qw_fin = np.load(json_data['metrics_path'] + 'fin_Q_w.npy', allow_pickle=True)  
-    cumulative_link_weights(init_weights, fin_weights, Qw_init, Qw_fin, dst=json_data['metrics_path'] + 'Qw_vs_w/')
-    """
+    #cumulative_link_weights(init_weights, fin_weights, Qw_init, Qw_fin, dst=json_data['metrics_path'] + 'Qw_vs_w/')
+    

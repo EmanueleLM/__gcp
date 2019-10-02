@@ -16,7 +16,7 @@ def hist_weights_mean_variance(init_weights, fin_weights, dst='', show=True):
         plt.hist(fin_weights[i].flatten(), bins=50, color='blue', alpha=0.5, label='Last Generation', normed=True)
         plt.xlabel('Value')
         plt.ylabel('Frequency')
-        plt.legend(loc='upper right')
+        plt.legend(loc='best')
         plt.savefig(dst + 'hist_'+weights_name[i]+'_best35nets.png')
         plt.savefig(dst + 'hist_'+weights_name[i]+'_best35nets.svg')
         plt.pause(0.05)
