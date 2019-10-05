@@ -6,17 +6,17 @@ Created on Sun Jun 30 14:47:47 2019
 """
 import json as json
 import numpy as np
+import sys as sys
 
-import evolutionary_tree as evotree
 import parameters as param
-import pareto as p_front
 import weights_matrix as w_m
 
-from utils.cumulative_link_weights import Qw
-from utils.hist_mean_variance import hist_weights_mean_variance
-from utils.kernel_analysis import kernels, receptive_fields
-from utils.metrics import nodes_strength, avg_strength, Yk, degrees_distribution, cumulative_link_weights
-from utils.normalize import normalize_01
+sys.path.append('./utils')
+from cumulative_link_weights import Qw
+from hist_mean_variance import hist_weights_mean_variance
+from kernel_analysis import kernels, receptive_fields
+from metrics import nodes_strength, avg_strength, Yk, degrees_distribution, cumulative_link_weights
+from normalize import normalize_01
 
 
 if __name__ == '__main__':
@@ -193,5 +193,5 @@ if __name__ == '__main__':
     Qw(init_weights, fin_weights, num_parameters, dst=json_data['metrics_path'])
     Qw_init = np.load(json_data['metrics_path'] + 'init_Q_w.npy', allow_pickle=True)
     Qw_fin = np.load(json_data['metrics_path'] + 'fin_Q_w.npy', allow_pickle=True)  
-    #cumulative_link_weights(init_weights, fin_weights, Qw_init, Qw_fin, dst=json_data['metrics_path'] + 'Qw_vs_w/')
+    cumulative_link_weights(init_weights, fin_weights, Qw_init, Qw_fin, dst=json_data['metrics_path'] + 'Qw_vs_w/')
     

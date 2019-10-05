@@ -8,28 +8,30 @@ Generate histigrams of kernels and the respective dendograms.
 """
 
 
-def kernels(init_kernel, fin_kernel, dst, mode='RGB', show=True):
+def kernels(init_kernel, fin_kernel, dst, mode='greyscale', show=True):
     """
-        Save (and plot) the kernels of the first layer, either in RGB or in RGBA format.
+        Save (and plot) the kernels of the first layer, either in greyscale or RGB/RGBA format.
         Take as input the firts kernel, pre and post training.
     """
     
     import matplotlib.pyplot as plt
     
-    if mode == 'RGB':
+    if mode == 'greyscale':
+        channels = 1
+    elif mode == 'RGB':
         channels = 3
     else:
         channels = 4
     
-    # plot each kernel as RGBA image
+    # plot each kernel as greyscale image
     for i in range(init_kernel.shape[-1]):
         fig = plt.figure()
         ax1 = fig.add_subplot(2,2,1)
         ax1.set_title('[KERNEL FIRST GEN.]: Number n.{}'.format(str(i)))
-        ax1.imshow(init_kernel[:,:,:channels,i])  # first 3 channels as RGB, otherwise RGBA
+        ax1.imshow(init_kernel[:,:,:channels,i].squeeze(), cmap='gray', vmin=0, vmax=1)  # first 3 channels as RGB, otherwise RGBA
         ax2 = fig.add_subplot(2,2,2)
         ax2.set_title('[KERNEL FIELD LAST GEN.]: Number n.{}'.format(str(i)))
-        ax2.imshow(fin_kernel[:,:,:channels,i])  # first 3 channels as RGB, otherwise RGBA
+        ax2.imshow(fin_kernel[:,:,:channels,i].squeeze(), cmap='gray', vmin=0, vmax=1)  # first 3 channels as RGB, otherwise RGBA
         plt.pause(0.05)
         fig.savefig(dst + 'kernels_conv1_' + mode +'_n{}.png'.format(str(i)))
     
@@ -39,37 +41,39 @@ def kernels(init_kernel, fin_kernel, dst, mode='RGB', show=True):
         pass
     
 
-def receptive_fields(init_kernel, fin_kernel, dst, mode='RGB', show=True):
+def receptive_fields(init_kernel, fin_kernel, dst, mode='greyscale', show=True):
     """
-        Save (and plot) the receptive fields of the first layer, either in RGB or in RGBA format.
+        Save (and plot) the kernels of the first layer, either in greyscale or RGB/RGBA format.
     """
     
     import numpy as np
     import matplotlib.pyplot as plt
     
-    if mode == 'RGB':
+    if mode == 'greyscale':
+        channels = 1
+    elif mode == 'RGB':
         channels = 3
     else:
         channels = 4
         
     # first rec. fields extraction
-    init_rec_field1 = np.zeros(shape=(84, 84, channels, 16))
-    fin_rec_field1 = np.zeros(shape=(84, 84, channels, 16))
+    init_rec_field1 = np.zeros(shape=(28, 28, channels, 16))
+    fin_rec_field1 = np.zeros(shape=(28, 28, channels, 16))
     
     for i in range(init_rec_field1.shape[-1]):
-        for n in range(0, 80, 4):
-            for m in range(0, 80, 4):
-                init_rec_field1[n:n+8,m:m+8,:channels,i] += init_kernel[:,:,:channels,i]
-                fin_rec_field1[n:n+8,m:m+8,:channels,i] += fin_kernel[:,:,:channels,i]
+        for n in range(0, 26, 2):
+            for m in range(0, 26, 2):
+                init_rec_field1[n:n+init_kernel.shape[0],m:m+init_kernel.shape[1],:channels,i] += init_kernel[:,:,:channels,i]
+                fin_rec_field1[n:n+init_kernel.shape[0],m:m+init_kernel.shape[1],:channels,i] += fin_kernel[:,:,:channels,i]
         
     for i in range(init_rec_field1.shape[-1]):
         fig = plt.figure()
         ax1 = fig.add_subplot(2,2,1)
         ax1.set_title('[RECEPTIVE FIELD FIRST GEN.]: Number n.{}'.format(str(i)))
-        ax1.imshow(init_rec_field1[:,:,:channels,i])  # first 3 channels as RGB
+        ax1.imshow(init_rec_field1[:,:,:channels,i].squeeze(), cmap='gray', vmin=0, vmax=1)  # first 3 channels as RGB
         ax2 = fig.add_subplot(2,2,2)
         ax2.set_title('[RECEPTIVE FIELD LAST GEN.]: Number n.{}'.format(str(i)))
-        ax2.imshow(fin_rec_field1[:,:,:channels,i])  # first 3 channels as RGB
+        ax2.imshow(fin_rec_field1[:,:,:channels,i].squeeze(), cmap='gray', vmin=0, vmax=1)  # first 3 channels as RGB
         plt.pause(0.05)
         fig.savefig(dst + 'receptive_field_conv1_' + mode + '_n{}.png'.format(str(i)))
         print("[CUSTOM-LOGGER]: Distance between receptive fields pre and post learning: {}.".format(np.linalg.norm(init_rec_field1[:,:,:channels,i]-fin_rec_field1[:,:,:channels,i])))
