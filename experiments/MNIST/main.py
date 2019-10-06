@@ -47,14 +47,13 @@ if __name__ == '__main__':
     kernels(init_weights[0], fin_weights[0], dst=json_data['kernel_analysis'] + 'greyscale/', mode='greyscale', show=True)
     receptive_fields(init_weights[0], fin_weights[0], dst=json_data['kernel_analysis'] + 'receptive_fields/', mode='greyscale', show=True)
     
-    
     # save the nodes strengths, cardinalities and squared node strengths
     print("\n[CUSTOM-LOGGER]: Extracting and saving node strengths, cardinalities and squared node strengths.")
     adj_matrices = [init_weights[0], init_weights[2], init_weights[4], init_weights[6]]
     biases = [init_weights[1], init_weights[3], init_weights[5], init_weights[7]]
     strides = [4,2, None, None]
-    input_shapes = [(28,28,1), (21,21,16), (11,11,32), (3872), (256), (10)]
-    input_padded = [(88,88,4), (25,25,16), (11,11,32), (3872), (256), (10)]
+    input_shapes = [(28,28,1), (7,7,16), (4,4,32), (256), (10)]
+    input_padded = [(32,32,1), (11,11,16), (4,4,32), (256), (10)]
     init = w_m.get_weights_matrix(adj_matrices,
                                   biases,
                                   strides,

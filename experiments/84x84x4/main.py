@@ -8,7 +8,9 @@ import json as json
 import numpy as np
 import sys as sys
 
+import evolutionary_tree as evotree
 import parameters as param
+import pareto as p_front
 import weights_matrix as w_m
 
 sys.path.append('./utils')
@@ -22,7 +24,7 @@ from normalize import normalize_01
 if __name__ == '__main__':
     
     # this is the only entry point you should touch in this file
-    json_config = 'config/private_eye.json'
+    json_config = 'config/bowling.json'
     json_data = json.load(open(json_config))
     
     name_flat_file = json_data['name_flat_file']
@@ -193,5 +195,5 @@ if __name__ == '__main__':
     Qw(init_weights, fin_weights, num_parameters, dst=json_data['metrics_path'])
     Qw_init = np.load(json_data['metrics_path'] + 'init_Q_w.npy', allow_pickle=True)
     Qw_fin = np.load(json_data['metrics_path'] + 'fin_Q_w.npy', allow_pickle=True)  
-    cumulative_link_weights(init_weights, fin_weights, Qw_init, Qw_fin, dst=json_data['metrics_path'] + 'Qw_vs_w/')
+    #cumulative_link_weights(init_weights, fin_weights, Qw_init, Qw_fin, dst=json_data['metrics_path'] + 'Qw_vs_w/')
     

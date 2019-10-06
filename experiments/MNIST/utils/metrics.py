@@ -242,8 +242,8 @@ def degrees_distribution(card, dst, show=True):
     plt.title('[P_k vs k]: FIRST GENERATION')
     plt.xlabel('k')
     plt.ylabel('P(k)')
-    plt.savefig(dst + 'P_k_vs_init.png')
-    plt.savefig(dst + 'P_k_vs_k_init.svg')  
+    plt.savefig(dst + 'P_k_vs_k.png')
+    plt.savefig(dst + 'P_k_vs_k.svg')  
     
     if show == True:
         plt.show()

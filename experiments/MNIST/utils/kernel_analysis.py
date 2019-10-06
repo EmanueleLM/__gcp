@@ -28,10 +28,10 @@ def kernels(init_kernel, fin_kernel, dst, mode='greyscale', show=True):
         fig = plt.figure()
         ax1 = fig.add_subplot(2,2,1)
         ax1.set_title('[KERNEL FIRST GEN.]: Number n.{}'.format(str(i)))
-        ax1.imshow(init_kernel[:,:,:channels,i].squeeze(), cmap='gray', vmin=0, vmax=1)  # first 3 channels as RGB, otherwise RGBA
+        ax1.imshow(init_kernel[:,:,:channels,i].squeeze(), cmap='gray')  # first 3 channels as RGB, otherwise RGBA
         ax2 = fig.add_subplot(2,2,2)
         ax2.set_title('[KERNEL FIELD LAST GEN.]: Number n.{}'.format(str(i)))
-        ax2.imshow(fin_kernel[:,:,:channels,i].squeeze(), cmap='gray', vmin=0, vmax=1)  # first 3 channels as RGB, otherwise RGBA
+        ax2.imshow(fin_kernel[:,:,:channels,i].squeeze(), cmap='gray')  # first 3 channels as RGB, otherwise RGBA
         plt.pause(0.05)
         fig.savefig(dst + 'kernels_conv1_' + mode +'_n{}.png'.format(str(i)))
     
@@ -61,8 +61,10 @@ def receptive_fields(init_kernel, fin_kernel, dst, mode='greyscale', show=True):
     fin_rec_field1 = np.zeros(shape=(28, 28, channels, 16))
     
     for i in range(init_rec_field1.shape[-1]):
-        for n in range(0, 26, 2):
-            for m in range(0, 26, 2):
+        for n in range(0, 24, 4):
+            for m in range(0, 24, 4):
+                print(n, m)
+                print(init_rec_field1[n:n+init_kernel.shape[0],m:m+init_kernel.shape[1],:channels,i].shape)
                 init_rec_field1[n:n+init_kernel.shape[0],m:m+init_kernel.shape[1],:channels,i] += init_kernel[:,:,:channels,i]
                 fin_rec_field1[n:n+init_kernel.shape[0],m:m+init_kernel.shape[1],:channels,i] += fin_kernel[:,:,:channels,i]
         
@@ -70,10 +72,10 @@ def receptive_fields(init_kernel, fin_kernel, dst, mode='greyscale', show=True):
         fig = plt.figure()
         ax1 = fig.add_subplot(2,2,1)
         ax1.set_title('[RECEPTIVE FIELD FIRST GEN.]: Number n.{}'.format(str(i)))
-        ax1.imshow(init_rec_field1[:,:,:channels,i].squeeze(), cmap='gray', vmin=0, vmax=1)  # first 3 channels as RGB
+        ax1.imshow(init_rec_field1[:,:,:channels,i].squeeze(), cmap='gray')  # first 3 channels as RGB
         ax2 = fig.add_subplot(2,2,2)
         ax2.set_title('[RECEPTIVE FIELD LAST GEN.]: Number n.{}'.format(str(i)))
-        ax2.imshow(fin_rec_field1[:,:,:channels,i].squeeze(), cmap='gray', vmin=0, vmax=1)  # first 3 channels as RGB
+        ax2.imshow(fin_rec_field1[:,:,:channels,i].squeeze(), cmap='gray')  # first 3 channels as RGB
         plt.pause(0.05)
         fig.savefig(dst + 'receptive_field_conv1_' + mode + '_n{}.png'.format(str(i)))
         print("[CUSTOM-LOGGER]: Distance between receptive fields pre and post learning: {}.".format(np.linalg.norm(init_rec_field1[:,:,:channels,i]-fin_rec_field1[:,:,:channels,i])))
