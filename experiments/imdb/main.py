@@ -1,77 +1,114 @@
 # -*- coding: utf-8 -*-
 """
-Created on Tue Oct  8 21:37:35 2019
+Created on Sun Jun 30 14:47:47 2019
 
 @author: Emanuele
-Train an LSTM model on the IMDB sentiment classification task.
 """
-
-import keras
-from keras.layers import Embedding
-from keras.models import Sequential
-from keras.layers import Flatten, Dense, LSTM
-from keras.datasets import imdb
-from keras import preprocessing
-
-class CustomSaverZero(keras.callbacks.Callback):
-    def on_epoch_end(self, epoch, logs={}):
-        global n_epochs
-        if epoch==0: # or save after some epoch, each k-th epoch etc.
-            self.model.save("models/model_{}.hd5".format(epoch))
-
-class CustomSaver(keras.callbacks.Callback):
-    def on_epoch_end(self, epoch, logs={}):
-        global n_epochs
-        if epoch==n_epochs-1: # or save after some epoch, each k-th epoch etc.
-            self.model.save("models/model_{}.hd5".format(epoch))
-            
-
-max_features = 10000
-maxlen = 20
-n_epochs = 10
-
-embedding_layer = Embedding(1000, 64, trainable=False)
-(x_train, y_train), (x_test, y_test) = imdb.load_data(num_words=max_features)
-x_train = preprocessing.sequence.pad_sequences(x_train, maxlen=maxlen)
-x_test = preprocessing.sequence.pad_sequences(x_test, maxlen=maxlen)    
-
-
-model = Sequential()
-model.add(Embedding(10000, 8, input_length=maxlen))
-model.add(LSTM(100))
-model.add(Dense(1, activation='sigmoid'))
-model.compile(optimizer='rmsprop', loss='binary_crossentropy', metrics=['acc'])
-model.summary()
-# train for the first epoch
-history = model.fit(x_train, y_train,
-                    epochs=1,
-                    batch_size=32,
-                    validation_split=0.7,
-                    callbacks=[CustomSaverZero()])
-# training till the network is reliable at classifying inputs
-history = model.fit(x_train, y_train,
-                    epochs=n_epochs,
-                    batch_size=32,
-                    validation_split=0.2,
-                    callbacks=[CustomSaver()])  
-# test on unseen data
-history = model.evaluate(x_test, y_test)    
-
-# save weights from the models (untrained vs trained)
-from keras.models import load_model
-
+import json as json
 import numpy as np
+import sys as sys
 
-init_weights, fin_weights = np.array([]), np.array([])
+import parameters as param
+import weights_matrix as w_m
 
-model = load_model('models/model_0.hd5')
-model.save_weights('adj_matrices/init_weights.hdf5')
-init_weights = np.fromfile('adj_matrices/init_weights.hdf5', dtype=float)
-        
-model = load_model('models/model_' + n_epochs-1 + '.hd5')
-model.save_weights('adj_matrices/init_weights.hdf5')
-fin_weights = np.fromfile('adj_matrices/init_weights.hdf5', dtype=float)
+sys.path.append('./utils')
+from cumulative_link_weights import Qw
+from hist_mean_variance import hist_weights_mean_variance
+from kernel_analysis import kernels, receptive_fields
+from metrics import nodes_strength, avg_strength, Yk, degrees_distribution, cumulative_link_weights
+from normalize import normalize_01
 
-np.save('adj_matrices/init_weights.npy', init_weights)
-np.save('adj_matrices/fin_weights.npy', fin_weights)
- 
+
+if __name__ == '__main__':
+    
+    # this is the only entry point you should touch in this file
+    json_config = 'config/model.json'
+    json_data = json.load(open(json_config))
+    
+    name_adj_matrices =  json_data['name_adj_matrices']
+    
+    # load initial and final weights, and normalize them
+    init_weights = np.load(json_data['name_adj_matrices'] + 'init_weights.npy', allow_pickle=True)
+    fin_weights = np.load(json_data['name_adj_matrices'] + 'fin_weights.npy', allow_pickle=True)    
+    
+    init_weights, fin_weights = normalize_01(init_weights, fin_weights)
+    
+    # standard parameters for a network whose input is an 84x84x4 image
+    num_parameters = np.sum([np.prod(w.shape) for w in init_weights])
+    net_parameters = [w.shape for w in init_weights]
+
+    # save the plot of each network layer whose values are normalized between 0. and 1.
+    print("\n[CUSTOM-LOGGER]: Extracting and saving weights mean and variance, for each layer.")
+    hist_weights_mean_variance(init_weights, fin_weights, dst=json_data['dst_mean_variance'])
+  
+    # save the nodes strengths, cardinalities and squared node strengths
+    print("\n[CUSTOM-LOGGER]: Extracting and saving node strengths, cardinalities and squared node strengths.")
+    adj_matrices = [init_weights[0], init_weights[1], init_weights[2], init_weights[4]]
+    biases = [0, 0, init_weights[3], init_weights[5]]
+    input_shapes = [net_parameters]
+    init = w_m.get_weights_matrix(adj_matrices,
+                                  biases,
+                                  input_shapes,
+                                  transform=None)
+    
+    adj_matrices = [fin_weights[0], fin_weights[1], fin_weights[2], fin_weights[4]]
+    biases = [0, 0, fin_weights[3], fin_weights[5]]
+    fin = w_m.get_weights_matrix(adj_matrices,
+                                 biases,
+                                 input_shapes,
+                                 transform=None)
+    
+    init_sq = w_m.get_weights_matrix(adj_matrices,
+                                  biases,
+                                  input_shapes,
+                                  transform=np.square)
+    
+    fin_sq = w_m.get_weights_matrix(adj_matrices,
+                                 biases,
+                                 input_shapes,
+                                 transform=np.square)
+    
+    print("[CUSTOM-LOGGER]: Saving node strengths, cardinalities and squared to folder {}.".format(json_data['metrics_path']))
+    np.save(json_data['metrics_path'] + 'dict_fin_strengths.npy', fin['strengths'])
+    np.save(json_data['metrics_path'] + 'dict_init_strengths.npy', init['strengths'])
+    np.save(json_data['metrics_path'] + 'dict_init_cardinality.npy', init['cardinality'])
+    np.save(json_data['metrics_path'] + 'dict_fin_cardinality.npy', fin['cardinality'])
+    np.save(json_data['metrics_path'] + 'dict_fin_squared_strengths.npy', fin_sq['strengths'])
+    np.save(json_data['metrics_path'] + 'dict_init_squared_strengths.npy', init_sq['strengths'])
+    
+
+    # Calculate, plot and save the weights strengths, i.e. s_in, s_out and their sum
+    print("\n[CUSTOM-LOGGER]: Calculate, plot and save the weights strengths, i.e. s_in, s_out and their sum.")
+    i_s = np.load(json_data['metrics_path'] + 'dict_init_strengths.npy', allow_pickle=True)
+    f_s = np.load(json_data['metrics_path'] + 'dict_fin_strengths.npy', allow_pickle=True)    
+    nodes_strength(i_s, f_s, dst=json_data['metrics_path'] + 's_in_s_out/', show=True)
+    
+    
+    # Calculate, plot and save the average weights strengths, i.e. s_k vs k
+    print("\n[CUSTOM-LOGGER]: Calculate, plot and save the average weights strengths, i.e. s_k vs k.")
+    card_i_s = np.load(json_data['metrics_path'] + 'dict_init_cardinality.npy', allow_pickle=True)
+    card_f_s = np.load(json_data['metrics_path'] + 'dict_fin_cardinality.npy', allow_pickle=True)
+    avg_strength(i_s, f_s, card_i_s, card_f_s, dst=json_data['metrics_path'] + 's_k_vs_k/', show=True)
+    
+    
+    # Calculate, plot and save <Y>(k) vs k metric
+    print("\n[CUSTOM-LOGGER]: Calculate, plot and save <Y>(k) vs k metric.")
+    i_s_squared = np.load(json_data['metrics_path'] + 'dict_init_squared_strengths.npy', allow_pickle=True)
+    f_s_squared = np.load(json_data['metrics_path'] + 'dict_fin_squared_strengths.npy', allow_pickle=True)
+    Yk(i_s, f_s, card_i_s, i_s_squared, f_s_squared, dst=json_data['metrics_path'] + 'Y_k_vs_k/', show=True)
+    
+    
+    # Calculate, plot and save the degrees distribution Pk
+    print("\n[CUSTOM-LOGGER]: Calculate, plot and save Pk vs k metric.")
+    card = np.load(json_data['metrics_path'] + 'dict_init_cardinality.npy', allow_pickle=True)
+    degrees_distribution(card, dst=json_data['metrics_path'] + 'Pk_vs_k/', show=True)
+    
+
+    # Calculate, plot and save the cumulative link weights
+    print("\n[CUSTOM-LOGGER]: Calculate, plot and save Q(w) vs w.")
+    print("[CUSTOM-LOGGER]: Please take care that this calculation may require hours!")
+    Qw(init_weights, fin_weights, num_parameters, dst=json_data['metrics_path'])
+    Qw_init = np.load(json_data['metrics_path'] + 'init_Q_w.npy', allow_pickle=True)
+    Qw_fin = np.load(json_data['metrics_path'] + 'fin_Q_w.npy', allow_pickle=True)  
+    cumulative_link_weights(Qw_init, Qw_fin, init_weights, fin_weights, dst=json_data['metrics_path'] + 'Qw_vs_w/')
+    
