@@ -36,7 +36,7 @@ if __name__ == '__main__':
     # standard parameters for a network whose input is an 84x84x4 image
     num_parameters = np.sum([np.prod(w.shape) for w in init_weights])
     net_parameters = [w.shape for w in init_weights]
-                
+
     # save the plot of each network layer whose values are normalized between 0. and 1.
     print("\n[CUSTOM-LOGGER]: Extracting and saving weights mean and variance, for each layer.")
     hist_weights_mean_variance(init_weights, fin_weights, dst=json_data['dst_mean_variance'])
@@ -126,5 +126,5 @@ if __name__ == '__main__':
     Qw(init_weights, fin_weights, num_parameters, dst=json_data['metrics_path'])
     Qw_init = np.load(json_data['metrics_path'] + 'init_Q_w.npy', allow_pickle=True)
     Qw_fin = np.load(json_data['metrics_path'] + 'fin_Q_w.npy', allow_pickle=True)  
-    cumulative_link_weights(init_weights, fin_weights, Qw_init, Qw_fin, dst=json_data['metrics_path'] + 'Qw_vs_w/')
+    cumulative_link_weights(Qw_init, Qw_fin, init_weights, fin_weights, dst=json_data['metrics_path'] + 'Qw_vs_w/')
     

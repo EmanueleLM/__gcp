@@ -249,6 +249,7 @@ def degrees_distribution(card, dst, show=True):
         plt.show()
     else:
         pass    
+    
 
 def cumulative_link_weights(Qw_init, Qw_fin, init_weights, fin_weights, dst, show=True):
     """
@@ -258,30 +259,15 @@ def cumulative_link_weights(Qw_init, Qw_fin, init_weights, fin_weights, dst, sho
     import matplotlib.pyplot as plt
     
     weights_name = ['conv1', 'bconv1', 'conv2', 'bconv2', 'dense1', 'bdense1', 'dense2', 'bdense2']    
-    
-    colors = ['red', 'green', 'blue', 'black', 'yellow', 'green', 'brown', 'purple']
-    
-    # 1) initial
-    for i in range(8): 
-       x, y = zip(*sorted(zip(Qw_init[i].flatten(), init_weights[i].flatten()))) 
-       print(x)
-       plt.title('[Q(w) vs w]: FIRST GENERATION')
-       plt.scatter(y, x, color=colors[i], label=weights_name[i])
-       plt.legend(loc='best')
-       plt.savefig(dst + 'Qw_vs_w_init'+ weights_name[i] +'.png')
-
-       if show == True:
-           plt.show()
-       else:
-           pass        
         
-    # 2) final
-    for i in range(8): 
-       x, y = zip(*sorted(zip(Qw_fin[i].flatten(), fin_weights[i].flatten())))   
-       plt.title('[Q(w) vs w]: FINAL GENERATION')
-       plt.scatter(y, x, color=colors[i], label=weights_name[i])
+    # 1) initial
+    for i in range(8):
+        
+       plt.title('[Q(w)]: ' + weights_name[i])
+       plt.scatter(init_weights[i].flatten(), Qw_init[i].flatten(),color='red', alpha=.5, label='initial')
+       plt.scatter(fin_weights[i].flatten(), Qw_fin[i].flatten(), color='blue', alpha=.5, label='final')
        plt.legend(loc='best')
-       plt.savefig(dst + 'Qw_vs_w_fin'+ weights_name[i] +'.png')
+       plt.savefig(dst + 'Qw_vs_w'+ weights_name[i] +'.png')
 
        if show == True:
            plt.show()

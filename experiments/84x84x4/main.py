@@ -20,11 +20,10 @@ from kernel_analysis import kernels, receptive_fields
 from metrics import nodes_strength, avg_strength, Yk, degrees_distribution, cumulative_link_weights
 from normalize import normalize_01
 
-
 if __name__ == '__main__':
     
     # this is the only entry point you should touch in this file
-    json_config = 'config/bowling.json'
+    json_config = 'config/frostbite.json'
     json_data = json.load(open(json_config))
     
     name_flat_file = json_data['name_flat_file']
@@ -114,7 +113,7 @@ if __name__ == '__main__':
     kernels(init_weights[0], fin_weights[0], dst=json_data['kernel_analysis'] + 'RGBA/', mode='RGBA', show=True)
     receptive_fields(init_weights[0], fin_weights[0], dst=json_data['kernel_analysis'] + 'receptive_fields/', mode='RGB', show=True)
     receptive_fields(init_weights[0], fin_weights[0], dst=json_data['kernel_analysis'] + 'receptive_fields/', mode='RGBA', show=True)
-    
+
     
     # save the nodes strengths, cardinalities and squared node strengths
     print("\n[CUSTOM-LOGGER]: Extracting and saving node strengths, cardinalities and squared node strengths.")
@@ -195,5 +194,5 @@ if __name__ == '__main__':
     Qw(init_weights, fin_weights, num_parameters, dst=json_data['metrics_path'])
     Qw_init = np.load(json_data['metrics_path'] + 'init_Q_w.npy', allow_pickle=True)
     Qw_fin = np.load(json_data['metrics_path'] + 'fin_Q_w.npy', allow_pickle=True)  
-    #cumulative_link_weights(init_weights, fin_weights, Qw_init, Qw_fin, dst=json_data['metrics_path'] + 'Qw_vs_w/')
+    cumulative_link_weights(Qw_init, Qw_fin, init_weights, fin_weights, dst=json_data['metrics_path'] + 'Qw_vs_w/')
     

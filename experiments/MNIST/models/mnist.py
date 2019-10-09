@@ -26,7 +26,7 @@ def _normalize(x, std):
     return x.assign(tf.py_func(py_func_init, [x], tf.float32))
 
 
-def conv(x, kernel_size, num_outputs, name, stride=1, padding="SAME", bias=True, std=1.0):
+def conv(x, kernel_size, num_outputs, name, act, stride=1, padding="SAME", bias=True, std=1.0):
     
     import tensorflow as tf
 
@@ -40,12 +40,12 @@ def conv(x, kernel_size, num_outputs, name, stride=1, padding="SAME", bias=True,
 
         b.reinitialize = b.assign(tf.zeros_like(b))
 
-        return ret + b
+        return act(ret + b)
     else:
-        return ret
+        return act(ret)
     
 
-def dense(x, size, name, weight_init=None, bias=True, std=1.0):
+def dense(x, size, name, act, weight_init=None, bias=True, std=1.0):
     
     import tensorflow as tf
 
@@ -59,9 +59,9 @@ def dense(x, size, name, weight_init=None, bias=True, std=1.0):
 
         b.reinitialize = b.assign(tf.zeros_like(b))
 
-        return ret + b
+        return act(ret + b)
     else:
-        return ret
+        return act(ret)
     
     
 def flattenallbut0(x):
@@ -89,11 +89,11 @@ def MNIST_model(steps_number=5000, batch_size=100, save_to_file=False, dst=''):
     labels = tf.placeholder(tf.float32, [None, labels_size])
     
     # Build the network (only output layer)
-    l1 = conv(training_data, name='conv1', num_outputs=16, kernel_size=8, stride=4, std=1.0)
-    l2 = conv(l1, name='conv2', num_outputs=32, kernel_size=4, stride=2, std=1.0)
+    l1 = conv(training_data, name='conv1', act=tf.nn.relu, num_outputs=16, kernel_size=8, stride=4, std=1.0)
+    l2 = conv(l1, name='conv2', act=tf.nn.relu, num_outputs=32, kernel_size=4, stride=2, std=1.0)
     l2_f = flattenallbut0(l2)
-    l3 = dense(l2_f, 256, 'fc1', None, std=1.0)
-    output = dense(l3, 10, 'fc2', None, std=1.0)
+    l3 = dense(l2_f, 256, 'fc1',  act=tf.nn.relu, weight_init=None, std=1.0)
+    output = dense(l3, 10, 'fc2',  act=tf.nn.relu, weight_init=None, std=1.0)
     
     # Define the loss function
     loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels=labels, logits=output))
