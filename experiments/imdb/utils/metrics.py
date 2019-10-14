@@ -147,7 +147,7 @@ def Yk(i_s, f_s, card_init, i_s_squared, f_s_squared, dst, show=True):
     Yi_init['i-l2'] = i_s_squared.item().get('i-l2') 
     Yi_init['i-l2'] /= (i_s.item().get('i-l2') + i_s.item().get('i-l3'))**2
     Yi_init['i-l3'] = i_s_squared.item().get('o-l2') 
-    Yi_init['i-l3'] /= (i_s.item().get('o-l2') + i_s.item().get('o-l3'))**2    
+    Yi_init['i-l3'] /= (i_s.item().get('o-l2') + i_s.item().get('o-l3'))**2
     
     Yi_fin['i-l1'] = f_s_squared.item().get('i-l1') 
     Yi_fin['i-l1'] /= (f_s.item().get('i-l1') + f_s.item().get('o-l1'))**2
@@ -168,6 +168,7 @@ def Yk(i_s, f_s, card_init, i_s_squared, f_s_squared, dst, show=True):
         degrees = np.append(degrees, nodes_degrees[key].flatten())
     
     Y_k_init, Y_k_fin = {}, {}
+    print(degrees.shape, Y_i_init_flatten.shape)
     for unique_k in np.sort(np.unique(degrees)):
         where_is_k = np.argwhere(degrees==unique_k)
         Y_k_init[str(unique_k)] = np.average(Y_i_init_flatten[where_is_k])

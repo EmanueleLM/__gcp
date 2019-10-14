@@ -16,6 +16,7 @@ from cumulative_link_weights import Qw
 from hist_mean_variance import hist_weights_mean_variance
 from kernel_analysis import kernels, receptive_fields
 from metrics import nodes_strength, avg_strength, Yk, degrees_distribution, cumulative_link_weights
+from info_measures import plot_mutual_information, plot_information_plane
 from normalize import normalize_01
 
 
@@ -127,4 +128,15 @@ if __name__ == '__main__':
     Qw_init = np.load(json_data['metrics_path'] + 'init_Q_w.npy', allow_pickle=True)
     Qw_fin = np.load(json_data['metrics_path'] + 'fin_Q_w.npy', allow_pickle=True)  
     cumulative_link_weights(Qw_init, Qw_fin, init_weights, fin_weights, dst=json_data['metrics_path'] + 'Qw_vs_w/')
+    
+    # plot mutual information during the training phase
+    print("\n[CUSTOM-LOGGER]: Plot and save mutual information.")
+    mutual_info = np.load(json_data['info_theory'] + 'I_x_t.npy', allow_pickle=True)
+    plot_mutual_information(mutual_info, dst=json_data['info_theory'] + 'mutual_information/') 
+    
+    # plot the information plane during the training phase
+    print("\n[CUSTOM-LOGGER]: Plot and save the information plane.")
+    I_x_t = np.load(json_data['info_theory'] + 'I_x_t.npy', allow_pickle=True)
+    I_t_y = np.load(json_data['info_theory'] + 'I_t_y.npy', allow_pickle=True)
+    plot_information_plane(I_x_t, I_t_y, dst=json_data['info_theory'] + 'information_plane/') 
     

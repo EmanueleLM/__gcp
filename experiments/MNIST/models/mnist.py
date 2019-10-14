@@ -66,14 +66,18 @@ def dense(x, size, name, act, weight_init=None, bias=True, std=1.0):
     
 def flattenallbut0(x):
     import numpy as np
-    print(x)
     return tf.reshape(x, [-1, int(np.prod(x.get_shape().as_list()[1:]))])
 
 
-def MNIST_model(steps_number=5000, batch_size=100, save_to_file=False, dst=''):
+def MNIST_model(steps_number=5000, batch_size=100, save_to_file=False, dst='', get_m_info=False):
     
     import numpy as np
     import tensorflow as tf
+    
+    if get_m_info is True:
+        import sys
+        sys.path.append('../')
+        import mutual_info as m_info
     
     # Read data
     mnist = input_data.read_data_sets("MNIST_data/", one_hot=True)
@@ -89,11 +93,25 @@ def MNIST_model(steps_number=5000, batch_size=100, save_to_file=False, dst=''):
     labels = tf.placeholder(tf.float32, [None, labels_size])
     
     # Build the network (only output layer)
-    l1 = conv(training_data, name='conv1', act=tf.nn.relu, num_outputs=16, kernel_size=8, stride=4, std=1.0)
+    l1 = conv(training_data, name='conv1', act=tf.nn.relu, num_outputs=32, kernel_size=8, stride=4, std=1.0)
     l2 = conv(l1, name='conv2', act=tf.nn.relu, num_outputs=32, kernel_size=4, stride=2, std=1.0)
     l2_f = flattenallbut0(l2)
     l3 = dense(l2_f, 256, 'fc1',  act=tf.nn.relu, weight_init=None, std=1.0)
     output = dense(l3, 10, 'fc2',  act=tf.nn.relu, weight_init=None, std=1.0)
+    
+    # dictionary used to estimate mutual info and the information plane trajectories
+    layers_to_estimate = [l1, l2, l3, output]  # should add the input
+    # I(x,t)
+    I_x_t = {'i-l1': np.array([]), 'l1-l2': np.array([]), 
+             'l2-l3': np.array([]), 'l3-o': np.array([])}
+    # I(t,y)
+    I_t_y = {'i-o': np.array([]), 'l1-o': np.array([]), 
+             'l2-o': np.array([]), 'l3-o': np.array([])}
+    tf_shapes = {'i': (batch_size, 28*28), 
+                 'l1': (batch_size, np.prod(l1.get_shape().as_list()[1:])),
+                 'l2': (batch_size, np.prod(l2.get_shape().as_list()[1:])),
+                 'l3': (batch_size, np.prod(l3.get_shape().as_list()[1:])),
+                 'o': (batch_size, np.prod(output.get_shape().as_list()[1:]))}
     
     # Define the loss function
     loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels=labels, logits=output))
@@ -114,6 +132,42 @@ def MNIST_model(steps_number=5000, batch_size=100, save_to_file=False, dst=''):
       # Get the next batch
       input_batch, labels_batch = mnist.train.next_batch(batch_size)
       feed_dict = {training_data: input_batch.reshape(batch_size, 28, 28, 1), labels: labels_batch}
+      
+      # append each activation to a separate vector then estimate I(li, lj)
+      # we need to pickup few random values from each layer, otherwise the calculation becomes prohibitive
+      if get_m_info is True:
+          tmp = []
+          mi_limit_sample = 100
+          layers_indices = {}
+          for key in tf_shapes.keys():
+              layers_indices[key] = np.random.randint(0, tf_shapes[key][1], size=mi_limit_sample)
+          for l in layers_to_estimate:
+              tmp.append(sess.run(l, {training_data: input_batch.reshape(batch_size, 28, 28, 1), labels: labels_batch}))
+          for key in I_x_t.keys():
+              if key == 'i-l1':
+                  ixt = m_info.mutual_information((np.take(input_batch.reshape(*(tf_shapes['i'])), axis=1, indices=layers_indices[key.split('-')[0]]),
+                                                   np.take(tmp[0].reshape(*(tf_shapes['l1'])), axis=1, indices=layers_indices[key.split('-')[1]])))
+                  ity = m_info.mutual_information((np.take(input_batch.reshape(*(tf_shapes['i'])), axis=1, indices=layers_indices[key.split('-')[0]]),
+                                                   np.take(tmp[3].reshape(*(tf_shapes['o'])), axis=1, indices=layers_indices['o'])))
+              elif key == 'l1-l2':
+                  ixt = m_info.mutual_information((np.take(tmp[0].reshape(*(tf_shapes['l1'])), axis=1, indices=layers_indices[key.split('-')[0]]),
+                                                   np.take(tmp[1].reshape(*(tf_shapes['l2'])), axis=1, indices=layers_indices[key.split('-')[1]])))
+                  ity = m_info.mutual_information((np.take(tmp[0].reshape(*(tf_shapes['l1'])), axis=1, indices=layers_indices[key.split('-')[0]]),
+                                                   np.take(tmp[3].reshape(*(tf_shapes['o'])), axis=1, indices=layers_indices['o'])))
+              elif key == 'l2-l3':
+                  ixt = m_info.mutual_information((np.take(tmp[1].reshape(*(tf_shapes['l2'])), axis=1, indices=layers_indices[key.split('-')[0]]),
+                                                   np.take(tmp[2].reshape(*(tf_shapes['l3'])), axis=1, indices=layers_indices[key.split('-')[1]])))
+                  ity = m_info.mutual_information((np.take(tmp[1].reshape(*(tf_shapes['l2'])), axis=1, indices=layers_indices[key.split('-')[0]]),
+                                                   np.take(tmp[3].reshape(*(tf_shapes['o'])), axis=1, indices=layers_indices['o'])))
+              elif key == 'l3-o':
+                  ixt = m_info.mutual_information((np.take(tmp[2].reshape(*(tf_shapes['l3'])), axis=1, indices=layers_indices[key.split('-')[1]]),
+                                                   np.take(tmp[3].reshape(*(tf_shapes['o'])), axis=1, indices=layers_indices[key.split('-')[1]])))
+                  ity = m_info.mutual_information((np.take(tmp[2].reshape(*(tf_shapes['l3'])), axis=1, indices=layers_indices[key.split('-')[1]]),
+                                                   np.take(tmp[3].reshape(*(tf_shapes['o'])), axis=1, indices=layers_indices['o'])))
+              
+              # save partial values of I(x,t) and I(t,y)
+              I_x_t[key] = np.append(I_x_t[key], ixt)
+              I_t_y[key.split('-')[0] + '-o'] = np.append(I_t_y[key.split('-')[0] + '-o'], ity)
     
       # Run the training step
       train_step.run(feed_dict=feed_dict)
@@ -142,3 +196,9 @@ def MNIST_model(steps_number=5000, batch_size=100, save_to_file=False, dst=''):
     test_accuracy = accuracy.eval(feed_dict={training_data: mnist.test.images.reshape(10000, 28, 28, 1),
                                              labels: mnist.test.labels})
     print("[CUSTOM-LOGGER]: Test accuracy: %g %%"%(test_accuracy*100))
+    
+    if get_m_info is True:
+        print("[CUSTOM-LOGGER]: Saving I(x,t) to file.")
+        np.save('../results/info_theory/I_x_t.npy', I_x_t)
+        print("[CUSTOM-LOGGER]: Saving I(t,y) to file.")
+        np.save('../results/info_theory/I_t_y.npy', I_t_y)

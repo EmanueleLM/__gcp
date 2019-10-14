@@ -93,6 +93,9 @@ if __name__ == '__main__':
     
     # Calculate, plot and save <Y>(k) vs k metric
     print("\n[CUSTOM-LOGGER]: Calculate, plot and save <Y>(k) vs k metric.")
+    i_s = np.load(json_data['metrics_path'] + 'dict_init_strengths.npy', allow_pickle=True)
+    f_s = np.load(json_data['metrics_path'] + 'dict_fin_strengths.npy', allow_pickle=True)
+    card_i_s = np.load(json_data['metrics_path'] + 'dict_init_cardinality.npy', allow_pickle=True)
     i_s_squared = np.load(json_data['metrics_path'] + 'dict_init_squared_strengths.npy', allow_pickle=True)
     f_s_squared = np.load(json_data['metrics_path'] + 'dict_fin_squared_strengths.npy', allow_pickle=True)
     Yk(i_s, f_s, card_i_s, i_s_squared, f_s_squared, dst=json_data['metrics_path'] + 'Y_k_vs_k/', show=True)

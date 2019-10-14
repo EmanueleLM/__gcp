@@ -2,5 +2,6 @@
  "name_adj_matrices": "results/adj_matrices/",
  "dst_mean_variance": "results/metrics/mean_std/",
  "metrics_path": "results/metrics/",
- "kernel_analysis": "results/kernel_analysis/"
+ "kernel_analysis": "results/kernel_analysis/",
+ "info_theory": "results/info_theory/"
  }

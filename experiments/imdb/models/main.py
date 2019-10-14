@@ -34,13 +34,13 @@ n_epochs = 10
 x_train = preprocessing.sequence.pad_sequences(x_train, maxlen=maxlen)
 x_test = preprocessing.sequence.pad_sequences(x_test, maxlen=maxlen)    
 
-
 model = Sequential()
 model.add(Embedding(10000, 8, input_length=maxlen, trainable=True))
 model.add(LSTM(100))
 model.add(Dense(1, activation='sigmoid'))
 model.compile(optimizer='rmsprop', loss='binary_crossentropy', metrics=['acc'])
 model.summary()
+
 # train for the first epoch
 history = model.fit(x_train, y_train,
                     epochs=1,
