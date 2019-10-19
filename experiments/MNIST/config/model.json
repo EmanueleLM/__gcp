@@ -3,5 +3,6 @@
  "dst_mean_variance": "results/metrics/mean_std/",
  "metrics_path": "results/metrics/",
  "kernel_analysis": "results/kernel_analysis/",
- "info_theory": "results/info_theory/"
+ "info_theory": "results/info_theory/",
+ "name_adj_matrices_s_minfo": "results/info_theory/weights/"
  }

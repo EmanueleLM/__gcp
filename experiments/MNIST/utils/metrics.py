@@ -21,7 +21,7 @@ It is also possible to normalize the weights before calculating the various metr
 
 def nodes_strength(i_s, f_s, dst, show=True):
     """
-        Plot nodes' strengths, i.e. s_in, s_out
+        Plot nodes' strengths, i.e. s_in + s_out (when avaialble)
     """
     
     import matplotlib.pyplot as plt

@@ -18,6 +18,7 @@ from kernel_analysis import kernels, receptive_fields
 from metrics import nodes_strength, avg_strength, Yk, degrees_distribution, cumulative_link_weights
 from info_measures import plot_mutual_information, plot_information_plane
 from normalize import normalize_01
+from strength_m_info import strength_minfo
 
 
 if __name__ == '__main__':
@@ -139,4 +140,27 @@ if __name__ == '__main__':
     I_x_t = np.load(json_data['info_theory'] + 'I_x_t.npy', allow_pickle=True)
     I_t_y = np.load(json_data['info_theory'] + 'I_t_y.npy', allow_pickle=True)
     plot_information_plane(I_x_t, I_t_y, dst=json_data['info_theory'] + 'information_plane/') 
+    
+    # plot the nodes strengths' mutual information through the epochs
+    print("\n[CUSTOM-LOGGER]: Plot and save the information plane between nodes strenghts.")
+    weights_s_minfo = []
+    for i in range(60):
+        # load initial and final weights, and normalize them
+        print("\n[CUSTOM-LOGGER]: Processing wieghts at epoch {}.".format(i))
+        ww = np.load(json_data['name_adj_matrices_s_minfo'] + 'params_s_minfo_gen_'+str(i)+'.npy', allow_pickle=True)
+        ww, _ = normalize_01(ww, ww)
+        adj_matrices = [ww[0], ww[2], ww[4], ww[6]]
+        biases = [ww[1], ww[3], ww[5], ww[7]]
+        strides = [4,2, None, None]
+        input_shapes = [(28,28,1), (7,7,32), (4,4,32), (256), (10)]
+        input_padded = [(32,32,1), (11,11,32), (4,4,32), (256), (10)]
+        ww = w_m.get_weights_matrix(adj_matrices,
+                                      biases,
+                                      strides,
+                                      input_shapes,
+                                      input_padded,
+                                      transform=None)
+        weights_s_minfo.append(ww['strengths'])
+    strength_minfo(weights_s_minfo, dst=json_data['info_theory'] + 'information_plane_s_minfo/') 
+
     
