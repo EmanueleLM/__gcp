@@ -69,7 +69,7 @@ def flattenallbut0(x):
     return tf.reshape(x, [-1, int(np.prod(x.get_shape().as_list()[1:]))])
 
 
-def MNIST_model(steps_number=5000, 
+def MNIST_model(steps_number=1000, 
                 batch_size=100, 
                 save_to_file=False, 
                 dst='', 
@@ -193,13 +193,13 @@ def MNIST_model(steps_number=5000,
               np.save(dst + 'fin_params.npy', np.asarray(final_params))
               
       # save all the weights from first to last iteration, then calculate the mutual info
-      #  between nodes' strengths: save every 50 steps
-      if get_nodes_strengths_m_info == True and i%50==0:
+      #  between nodes' strengths: save every <n> steps
+      if get_nodes_strengths_m_info == True and i%5:
           initial_params = []
           for t_var in tf.trainable_variables():
               initial_params.append(sess.run(t_var))          
           #print("[CUSTOM-LOGGER]: Saving params for nodes strengths calculation to file at relative path {}.".format(dst))
-          np.save(dst + 'params_s_minfo_gen_'+str(int(i/50))+'.npy', np.asarray(initial_params))
+          np.save(dst + 'params_s_minfo_gen_'+str(int(i/5))+'.npy', np.asarray(initial_params))
               
       # Print the accuracy progress on the batch every 100 steps
       if i%100 == 0:
