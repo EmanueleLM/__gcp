@@ -72,7 +72,7 @@ def flattenallbut0(x):
 def MNIST_model(steps_number=1000, 
                 batch_size=100, 
                 save_to_file=False, 
-                dst='', 
+                dst='../results/info_theory/weights/', 
                 get_m_info=False,
                 get_nodes_strengths_m_info=False):
     

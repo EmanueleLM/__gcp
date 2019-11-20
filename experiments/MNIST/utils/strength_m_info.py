@@ -43,10 +43,10 @@ def strength_minfo(weights_s_minfo, dst, show=True):
        
         init_s = {}
         init_s['i'] = i_s['o-l0']
-        init_s['l1'] = i_s['i-l1'] + i_s['o-l1']
-        init_s['l2'] = i_s['i-l2'] + i_s['o-l2']
-        init_s['l3'] = i_s['i-l3'] + i_s['o-l3']
-        init_s['o'] = i_s['i-l4']
+        init_s['l1'] = i_s['o-l1']
+        init_s['l2'] = i_s['o-l2']
+        init_s['l3'] = i_s['o-l3']
+        init_s['o'] = np.ones(shape=len(i_s['i-l4']))
         
         for key in ['i', 'l1', 'l2', 'l3']:
             if key == 'i':

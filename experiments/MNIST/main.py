@@ -28,7 +28,7 @@ if __name__ == '__main__':
     json_data = json.load(open(json_config))
     
     name_adj_matrices =  json_data['name_adj_matrices']
-    
+
     # load initial and final weights, and normalize them
     init_weights = np.load(json_data['name_adj_matrices'] + 'init_params.npy', allow_pickle=True)
     fin_weights = np.load(json_data['name_adj_matrices'] + 'fin_params.npy', allow_pickle=True)    
@@ -144,7 +144,7 @@ if __name__ == '__main__':
     # plot the nodes strengths' mutual information through the epochs
     print("\n[CUSTOM-LOGGER]: Plot and save the information plane between nodes strenghts.")
     weights_s_minfo = []
-    for i in range(200):
+    for i in range(3000):
         # load initial and final weights, and normalize them
         print("\n[CUSTOM-LOGGER]: Processing wieghts at epoch {}.".format(i))
         ww = np.load(json_data['name_adj_matrices_s_minfo'] + 'params_s_minfo_gen_'+str(i)+'.npy', allow_pickle=True)

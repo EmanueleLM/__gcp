@@ -15,6 +15,7 @@ def pareto_frontier(src_scores,
                     maxX=True, 
                     maxY=True):
     
+    
     import matplotlib.pyplot as plt
     import numpy as np
     
@@ -46,7 +47,7 @@ def pareto_frontier(src_scores,
     # Turn resulting pairs back into a list of Xs and Ys
     p_frontX = [pair[0] for pair in p_front]
     p_frontY = [pair[1] for pair in p_front]
-
+    
     plt.scatter(Xs, Ys, alpha=.5)        
     plt.plot(p_frontX, p_frontY, color='red', alpha=.75)
     plt.title('[PARETO FRONT]')
