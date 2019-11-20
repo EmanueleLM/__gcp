@@ -13,6 +13,10 @@ def conv2adj2d(k, i_shape, s=(1,1), p=(0,0)):
     kh, kw = k.shape[0], k.shape[1]
     Ih, Iw = i_shape[0], i_shape[1]
     Oh, Ow = int((Ih-kh+2*p[1])/s[0]) + 1,  int((Iw-kw+2*p[1])/s[1]) + 1
+    """
+    In general you don't need to build adj, you just need to compute
+     the non-zero cells and eventually their indices
+    """
     adj = np.zeros(shape=(Oh*Ow, Ih*Iw), dtype=np.float32)   
     #print(adj.shape)
     offv, offh = 0, 0  # vertical and horizontal offsets
@@ -23,6 +27,10 @@ def conv2adj2d(k, i_shape, s=(1,1), p=(0,0)):
         offh = s[0]*(i%Ow)
         for j in range(kh):
             #print(i, j+offh+offv, j+kw+offh+offv)
+            """
+            In general you don't need to build adj, you just need to compute
+             the non-zero cells and eventually their indices
+            """
             adj[i,j+offh+offv:j+kw+offh+offv] = k[j,:]    
             offh += Iw-1
     return adj
