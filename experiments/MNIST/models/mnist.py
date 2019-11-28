@@ -26,39 +26,33 @@ def _normalize(x, std):
     return x.assign(tf.py_func(py_func_init, [x], tf.float32))
 
 
-def conv(x, kernel_size, num_outputs, name, act, stride=1, padding="SAME", bias=True, std=1.0):
-    
-    import tensorflow as tf
-
-    w = tf.get_variable(name + "/w", [kernel_size, kernel_size, x.get_shape()[-1], num_outputs])
-
-    w.reinitialize = _normalize(w, std=std)
-
+def conv(x, kernel_size, num_outputs, name, act, stride=1, padding="SAME", bias=True):
+    import tensorflow as tf    
+    init = tf.random_uniform_initializer(minval=-0.05,
+                                         maxval=0.05)
+    w = tf.get_variable(name + "/w", 
+                        [kernel_size, kernel_size, x.get_shape()[-1], num_outputs], 
+                        initializer=init)
     ret = tf.nn.conv2d(x, w, [1, stride, stride, 1], padding=padding)
     if bias:
-        b = tf.get_variable(name + "/b", [1, 1, 1, num_outputs], initializer=tf.zeros_initializer)
-
-        b.reinitialize = b.assign(tf.zeros_like(b))
-
+        b = tf.get_variable(name + "/b", 
+                            [1, 1, 1, num_outputs], 
+                            initializer=init)
         return act(ret + b)
     else:
         return act(ret)
     
 
-def dense(x, size, name, act, weight_init=None, bias=True, std=1.0):
-    
+def dense(x, size, name, act, weight_init=None, bias=True):
     import tensorflow as tf
-
-    w = tf.get_variable(name + "/w", [x.get_shape()[1], size])
-
-    w.reinitialize = _normalize(w, std=std)
-
+    init = tf.random_uniform_initializer(minval=-0.05,
+                                         maxval=0.05)
+    w = tf.get_variable(name + "/w", 
+                        [x.get_shape()[1], size],
+                        initializer=init)
     ret = tf.matmul(x, w)
     if bias:
-        b = tf.get_variable(name + "/b", [size], initializer=tf.zeros_initializer)
-
-        b.reinitialize = b.assign(tf.zeros_like(b))
-
+        b = tf.get_variable(name + "/b", [size], initializer=init)
         return act(ret + b)
     else:
         return act(ret)
@@ -72,6 +66,7 @@ def flattenallbut0(x):
 def MNIST_model(steps_number=1000, 
                 batch_size=100, 
                 save_to_file=False, 
+                params=None,
                 dst='../results/info_theory/weights/', 
                 get_m_info=False,
                 get_nodes_strengths_m_info=False):
@@ -98,11 +93,23 @@ def MNIST_model(steps_number=1000,
     labels = tf.placeholder(tf.float32, [None, labels_size])
     
     # Build the network (only output layer)
-    l1 = conv(training_data, name='conv1', act=tf.nn.relu, num_outputs=32, kernel_size=8, stride=4, std=1.0)
-    l2 = conv(l1, name='conv2', act=tf.nn.relu, num_outputs=32, kernel_size=4, stride=2, std=1.0)
+    if params is None:
+        params = [32, 8, 4, 32, 4, 2, 256]
+    l1 = conv(training_data, 
+              name='conv1', 
+              act=tf.nn.relu, 
+              num_outputs=params[0], 
+              kernel_size=params[1], 
+              stride=params[2])
+    l2 = conv(l1, 
+              name='conv2', 
+              act=tf.nn.relu, 
+              num_outputs=params[3], 
+              kernel_size=params[4], 
+              stride=params[5])
     l2_f = flattenallbut0(l2)
-    l3 = dense(l2_f, 256, 'fc1',  act=tf.nn.relu, weight_init=None, std=1.0)
-    output = dense(l3, 10, 'fc2',  act=tf.nn.relu, weight_init=None, std=1.0)
+    l3 = dense(l2_f, params[6], 'fc1',  act=tf.nn.relu, weight_init=None)
+    output = dense(l3, 10, 'fc2',  act=tf.nn.relu, weight_init=None)
     
     # dictionary used to estimate mutual info and the information plane trajectories
     layers_to_estimate = [l1, l2, l3, output]  # should add the input
@@ -189,7 +196,7 @@ def MNIST_model(steps_number=1000,
               final_params = []
               for t_var in tf.trainable_variables():
                   final_params.append(sess.run(t_var))
-              print("[CUSTOM-LOGGER]: Saving initial params to file at relative path {}.".format(dst))                  
+              print("[CUSTOM-LOGGER]: Saving final params to file at relative path {}.".format(dst))                  
               np.save(dst + 'fin_params.npy', np.asarray(final_params))
               
       # save all the weights from first to last iteration, then calculate the mutual info
@@ -216,3 +223,5 @@ def MNIST_model(steps_number=1000,
         np.save('../results/info_theory/I_x_t.npy', I_x_t)
         print("[CUSTOM-LOGGER]: Saving I(t,y) to file.")
         np.save('../results/info_theory/I_t_y.npy', I_t_y)
+    
+    return test_accuracy
