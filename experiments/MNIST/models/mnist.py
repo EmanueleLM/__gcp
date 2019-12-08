@@ -26,7 +26,7 @@ def _normalize(x, std):
     return x.assign(tf.py_func(py_func_init, [x], tf.float32))
 
 
-def conv(x, kernel_size, num_outputs, name, act, stride=1, padding="SAME", bias=True):
+def conv(x, kernel_size, num_outputs, name, act, stride=1, padding="VALID", bias=True):
     import tensorflow as tf    
     init = tf.random_uniform_initializer(minval=-0.05,
                                          maxval=0.05)
