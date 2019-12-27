@@ -14,11 +14,11 @@ import metrics as mt
 import mnist as mnist
 
 # k1.{ofilters, ksize, stride}, k2.{ofilters, ksize, stride}, dense_neurons
-custom_p = [[16, 2, 2, 16, 2, 2, 256] for _ in range(3)]
+custom_p = [[64, 3, 3, 64, 3, 3, 256] for _ in range(7)]
 
 if __name__=="__main__":
     for (i, cp) in zip(range(len(custom_p)), custom_p):        
-        acc = mnist.MNIST_model(steps_number=1000, 
+        acc = mnist.MNIST_model(steps_number=2000, 
                                 batch_size=100, 
                                 save_to_file=True,
                                 params=cp,
@@ -34,7 +34,7 @@ if __name__=="__main__":
             plt.hist(init[j].flatten(), bins=50, color='red', alpha=0.5, label="first gen.", normed=True)
             plt.hist(fin[j].flatten(), bins=50, color='blue', alpha=0.5, label="last gen.", normed=True)
             plt.legend(loc='best')
-            plt.savefig('./MNIST_results/exp-{0:}-w-layer{1:}-params-{2:}-acc-{3:.3f}.png'.format(i+1, j, cp, acc))
+            plt.savefig('./MNIST_results/cnn-exp-{0:}-w-layer{1:}-params-{2:}-acc-{3:.3f}.png'.format(i+1, j, cp, acc))
             plt.show()
         # nodes strength, s_in and s_out
         I_shape = (28,28)
@@ -54,7 +54,7 @@ if __name__=="__main__":
             plt.hist(s_out_i.flatten(), bins=50, color='blue', alpha=0.5, label="s_out first gen.",normed=True)
             plt.hist(s_out_f.flatten(), bins=50, color='green', alpha=0.5,label="s_out last gen.", normed=True)
             plt.legend(loc='best')
-            plt.savefig('./MNIST_results/exp-{0:}-ns-layer{1:}-params-{2:}-acc-{3:.3f}.png'.format(i+1, j, cp, acc))
+            plt.savefig('./MNIST_results/cnn-exp-{0:}-ns-layer{1:}-params-{2:}-acc-{3:.3f}.png'.format(i+1, j, cp, acc))
             plt.show() 
         # nodes strength s = s_in + s_out
         prec_i, prec_f = 0., 0.
@@ -77,7 +77,29 @@ if __name__=="__main__":
             plt.hist(s_i.flatten(), bins=50, color='blue', alpha=0.5, label="s first gen.", normed=True)
             plt.hist(s_f.flatten(), bins=50, color='green', alpha=0.5, label="s first gen.", normed=True)
             plt.legend(loc='best')
-            plt.savefig('./MNIST_results/exp-{0:}-fullns-layer{1:}-params-{2:}-acc-{3:.3f}.png'.format(i+1, j, cp, acc))
+            plt.savefig('./MNIST_results/cnn-exp-{0:}-fullns-layer{1:}-params-{2:}-acc-{3:.3f}.png'.format(i+1, j, cp, acc))
+            plt.show() 
+        # nodes disparity Y_i
+        I_shape = (28,28)
+        for j in [0,2,4,6]:
+            if j <= 2:
+                stride = ((custom_p[i][2], custom_p[i][2]) if j==0 else (custom_p[i][5], custom_p[i][5]))
+                n_i, _ = mt.multichannel_nodes_strength(init[j]**2, I_shape, s=stride, pad='VALID')
+                n_f, _ = mt.multichannel_nodes_strength(fin[j]**2, I_shape, s=stride, pad='VALID')
+                s_in_i, _ = mt.multichannel_nodes_strength(np.abs(init[j]), I_shape, s=stride, pad='VALID')
+                s_in_f, _ = mt.multichannel_nodes_strength(np.abs(fin[j]), I_shape, s=stride, pad='VALID')
+                I_shape = (int(s_out_i.shape[-1]**0.5), int(s_out_i.shape[-1]**0.5))
+                Y_i = n_i/s_in_i**2
+                Y_f = n_f/s_in_f**2
+            else:
+                s_in_i, s_in_f = np.sum(np.abs(init[j]), axis=1), np.sum(np.abs(fin[j]), axis=1)
+                Y_i = np.sum(init[j]**2, axis=1)/s_in_i
+                Y_f = np.sum(fin[j]**2, axis=1)/s_in_f            
+            plt.title('[EXPERIMENT {}]: Nodes disparity layer {}'.format(i, j))
+            plt.scatter(s_in_i, Y_i.flatten(), color='blue', alpha=0.5, label="Y_i first gen.")
+            plt.scatter(s_in_f, Y_f.flatten(), color='green', alpha=0.5, label="Y_i last gen.")
+            plt.legend(loc='best')
+            plt.savefig('./MNIST_results/cnn-exp-{0:}-disparity-layer{1:}-params-{2:}-acc-{3:.3f}.png'.format(i+1, j, cp, acc))
             plt.show() 
         # cumulative link weights
         for j in [0,2,4,6]:
@@ -87,7 +109,7 @@ if __name__=="__main__":
             plt.hist(init[j].flatten(), bins=50, color='red', alpha=0.5, histtype='step', label="first gen.", cumulative=True, normed=True)
             plt.hist(fin[j].flatten(), bins=50, color='blue', alpha=0.5, histtype='step', label="last gen.", cumulative=True, normed=True)
             plt.legend(loc='best')
-            plt.savefig('./MNIST_results/exp-{0:}-clw-layer{1:}-params-{2:}-acc-{3:.3f}.png'.format(i+1, j, cp, acc))
+            plt.savefig('./MNIST_results/cnn-exp-{0:}-clw-layer{1:}-params-{2:}-acc-{3:.3f}.png'.format(i+1, j, cp, acc))
             plt.show()
         # cumulative nodes strength
         for j in [0,2,4,6]:
@@ -101,12 +123,11 @@ if __name__=="__main__":
             plt.hist(i_in, bins=50, color='red', alpha=0.5, histtype='step', label="first gen.", cumulative=True, normed=True)
             plt.hist(f_in, bins=50, color='blue', alpha=0.5, histtype='step', label="last gen.", cumulative=True, normed=True)
             plt.legend(loc='best')
-            plt.savefig('./MNIST_results/exp-{0:}-cns-in-layer{1:}-params-{2:}-acc-{3:.3f}.png'.format(i+1, j, cp, acc))
+            plt.savefig('./MNIST_results/cnn-exp-{0:}-cns-in-layer{1:}-params-{2:}-acc-{3:.3f}.png'.format(i+1, j, cp, acc))
             plt.show()
             plt.title('Cumulative nodes strength output {}, layer {}'.format(i, j))
             plt.hist(i_out, bins=50, color='red', alpha=0.5, histtype='step', cumulative=True, normed=True)
             plt.hist(f_out, bins=50, color='blue', alpha=0.5, histtype='step', cumulative=True, normed=True)
             plt.legend(loc='best')
-            plt.savefig('./MNIST_results/exp-{0:}-cns-out-layer{1:}-params-{2:}-acc-{3:.3f}.png'.format(i+1, j, cp, acc))
+            plt.savefig('./MNIST_results/cnn-exp-{0:}-cns-out-layer{1:}-params-{2:}-acc-{3:.3f}.png'.format(i+1, j, cp, acc))
             plt.show()
-        
