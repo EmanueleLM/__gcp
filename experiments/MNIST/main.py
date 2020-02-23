@@ -48,7 +48,7 @@ if __name__ == '__main__':
     print("\n[CUSTOM-LOGGER]: Extracting and saving kernels and receptive fields (greyscale).")
     kernels(init_weights[0], fin_weights[0], dst=json_data['kernel_analysis'] + 'greyscale/', mode='greyscale', show=True)
     receptive_fields(init_weights[0], fin_weights[0], dst=json_data['kernel_analysis'] + 'receptive_fields/', mode='greyscale', show=True)
-    
+
     # save the nodes strengths, cardinalities and squared node strengths
     print("\n[CUSTOM-LOGGER]: Extracting and saving node strengths, cardinalities and squared node strengths.")
     adj_matrices = [init_weights[0], init_weights[2], init_weights[4], init_weights[6]]
