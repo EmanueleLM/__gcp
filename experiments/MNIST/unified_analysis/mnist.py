@@ -16,10 +16,21 @@ from keras import backend as K
 
 # custom seed's range (multiple experiments)
 parser = ArgumentParser()
+parser.add_argument("-a", "--architecture", dest="architecture", default='fc', type=str,
+                    help="Architecture (fc or cnn so far).")
+parser.add_argument("-c", "--cut-training", dest="cut_training", action='store_true',
+                    help="Enable the selection of the size of the dataset randomly from 1k to 60k")
 parser.add_argument("-s", "--seed", dest="seed_range", default=0, type=int,
                     help="Seed range (from n to n+10).")  
+parser.add_argument("-min", "--min", dest="min", default=0.0, type=float,
+                    help="Min accuracy values for final models (discard anything below).")
+parser.add_argument("-max", "--max", dest="max", default=1.0, type=float,
+                    help="Min accuracy values for final models (discard anything above).")
 args = parser.parse_args()
+architecture = args.architecture
+cut_training = args.cut_training
 seed_range = args.seed_range
+min_range_fin, max_range_fin = args.min, args.max
 
 # import data, once
 batch_size = 128
@@ -85,17 +96,14 @@ for seed_value in range(seed_range, seed_range+10):
  
     for key in initializers.keys():
         model = Sequential()
-        """
-        model.add(Conv2D(32, kernel_size=(3, 3),
-                         activation='relu',
-                         input_shape=input_shape,
-                         kernel_initializer=initializers[key], 
-                         bias_initializer='zeros'))
-        model.add(Conv2D(64, (3, 3), activation='relu', kernel_initializer=initializers[key], bias_initializer='zeros'))
-        """
-        model.add(Flatten())
-        model.add(Dense(256, activation='relu',kernel_initializer=initializers[key], bias_initializer='zeros'))
-        model.add(Dense(128, activation='relu',kernel_initializer=initializers[key], bias_initializer='zeros'))
+        if architecture == 'cnn':
+            model.add(Conv2D(np.random.randint(2, 8), kernel_size=(3, 3),activation='relu',input_shape=input_shape,kernel_initializer=initializers[key],bias_initializer='zeros'))
+            model.add(Conv2D(np.random.randint(2, 8), (3, 3), activation='relu', kernel_initializer=initializers[key], bias_initializer='zeros'))
+            model.add(Flatten())
+        elif architecture == 'fc':
+            model.add(Flatten())
+            model.add(Dense(np.random.randint(2, 64), activation='relu',kernel_initializer=initializers[key], bias_initializer='zeros'))
+            model.add(Dense(np.random.randint(2, 64), activation='relu',kernel_initializer=initializers[key], bias_initializer='zeros'))
         model.add(Dense(128, activation='relu',kernel_initializer=initializers[key], bias_initializer='zeros'))
         model.add(Dense(num_classes, activation='softmax'))
         
@@ -104,18 +112,26 @@ for seed_value in range(seed_range, seed_range+10):
                       metrics=['accuracy'])
         
         # Save the weights at the first and last iteration
-        dst = './results/fc/'
+        dst = './results/{}/'.format(architecture)
         save_to_file = True
+        """
         print("[CUSTOM-LOGGER]: Saving initial params to file at relative path {}.".format(dst))
         np.save(dst + 'i_seed-{}_init-{}_score-{:.3f}.npy'.format(seed_value,key,model.evaluate(x_test, y_test, verbose=0)[1]), 
                 np.asarray(model.get_weights()))
+        """
+        if cut_training is True:
+            dataset_size = int(0.25*np.random.rand()*len(x_train))
+        else:
+            dataset_size = len(x_train)
         # train        
-        model.fit(x_train, y_train,
+        print("[logger]: Training on {}/{} datapoints.".format(dataset_size, len(x_train)))
+        model.fit(x_train[:dataset_size], y_train[:dataset_size],
                   batch_size=batch_size,
                   epochs=epochs,
                   verbose=1,
                   validation_data=(x_test, y_test))
         # test and save
         print("[CUSTOM-LOGGER]: Saving final params to file at relative path {}.".format(dst))                  
-        np.save(dst + 'f_seed-{}_init-{}_score-{:.3f}.npy'.format(seed_value,key,model.evaluate(x_test, y_test, verbose=0)[1]),
-                np.asarray(model.get_weights()))
+        accuracy = model.evaluate(x_test, y_test, verbose=0)[1]
+        if accuracy >= min_range_fin and accuracy <= max_range_fin:
+            np.save(dst + 'f_seed-{}_init-{}_score-{:.3f}.npy'.format(seed_value,key,accuracy),np.asarray(model.get_weights()))
