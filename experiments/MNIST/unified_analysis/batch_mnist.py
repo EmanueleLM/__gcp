@@ -5,7 +5,6 @@ Created on Sun Nov 24 21:48:55 2019
 @author: Emanuele
 Last layer characterization.
 """
-import glob
 import matplotlib.pyplot as plt
 import numpy as np
 import sys
@@ -16,32 +15,18 @@ import metrics as mt
 import draw_bipartite as db
 
 
-def filename_gt(path, accuracy_threshold, prefix='f'):
-    files_ = []
-    for g in glob.glob(path + prefix + '*.npy'):
-        if float('0.'+g.split('.npy')[0].split('0.')[-1])>accuracy_threshold:
-            files_.append(g)
-    return files_
-        
 if __name__=="__main__":
-    topology = 'cnn'
-    init, fin = np.zeros(shape=(128,10)), np.zeros(shape=(128,10)) 
-    for i in filename_gt('results/{}/'.format(topology), 0., prefix='i'):
-        tmp = np.load(i, allow_pickle=True)
-        init += tmp[-1]+tmp[-2]  # matrix and bias
-    for f in filename_gt('results/{}/'.format(topology), 0.9, prefix='f'):
-        tmp = np.load(f, allow_pickle=True)
-        fin += tmp[-1]+tmp[-2]  # matrix and bias
-    # average the values
-    init /= len(filename_gt('results/{}/'.format(topology), 0., prefix='i'))
-    fin /= len(filename_gt('results/{}/'.format(topology), 0.9, prefix='f'))
+    topology = 'fc'
+    init_acc_le, fin_acc_ge = (0.0, 0.15), (0.95, 1.0)
+    init = np.load('./results/{}_weights_npy/init_weights_acc-le-{}-{}.npy'.format(topology, init_acc_le[0], init_acc_le[1]), allow_pickle=True)
+    fin = np.load('./results/{}_weights_npy/fin_weights_acc-ge-{}-{}.npy'.format(topology, fin_acc_ge[0], fin_acc_ge[1]), allow_pickle=True)
     # nodes mean and variance
     plt.title('Weights last layer')
     plt.hist(init.flatten(), bins=50, color='red', alpha=0.5, label="first gen.", normed=True)
     plt.hist(fin.flatten(), bins=50, color='blue', alpha=0.5, label="last gen.", normed=True)
     plt.legend(loc='best')
-    plt.savefig('./images/{}/{}-mean-variance.png'.format(topology, topology))
-    plt.savefig('./images/{}/{}-mean-variance.svg'.format(topology, topology))
+    plt.savefig('./images/{}/{}-mean-variance-{}-{}.png'.format(topology, topology, init_acc_le, fin_acc_ge))
+    plt.savefig('./images/{}/{}-mean-variance-{}-{}.svg'.format(topology, topology, init_acc_le, fin_acc_ge))
     plt.show()
     # nodes strength, s_in and s_out
     s_in_i, s_out_i = np.sum(init, axis=1), np.sum(init, axis=0)
@@ -52,8 +37,8 @@ if __name__=="__main__":
     plt.hist(s_out_i.flatten(), bins=50, color='blue', alpha=0.5, label="s_out first gen.",normed=True)
     plt.hist(s_out_f.flatten(), bins=50, color='green', alpha=0.5,label="s_out last gen.", normed=True)
     plt.legend(loc='best')
-    plt.savefig('./images/{}/{}-s-in_s-out.png'.format(topology, topology))
-    plt.savefig('./images/{}/{}-s-in_s-out.svg'.format(topology, topology))
+    plt.savefig('./images/{}/{}-s-in_s-out-{}-{}.png'.format(topology, topology, init_acc_le, fin_acc_ge))
+    plt.savefig('./images/{}/{}-s-in_s-out-{}-{}.svg'.format(topology, topology, init_acc_le, fin_acc_ge))
     plt.show() 
     # nodes strength s = s_in + s_out
     prec_i, prec_f = 0., 0.
@@ -67,8 +52,8 @@ if __name__=="__main__":
     plt.hist(s_i.flatten(), bins=50, color='blue', alpha=0.5, label="s first gen.", normed=True)
     plt.hist(s_f.flatten(), bins=50, color='green', alpha=0.5, label="s last gen.", normed=True)
     plt.legend(loc='best')
-    plt.savefig('./images/{}/{}-s.png'.format(topology, topology))
-    plt.savefig('./images/{}/{}-s.svg'.format(topology, topology))
+    plt.savefig('./images/{}/{}-s-{}-{}.png'.format(topology, topology, init_acc_le, fin_acc_ge))
+    plt.savefig('./images/{}/{}-s-{}-{}.svg'.format(topology, topology, init_acc_le, fin_acc_ge))
     plt.show() 
     # nodes disparity Y_i
     s_in_i, s_in_f = np.sum(np.abs(init), axis=1), np.sum(np.abs(fin), axis=1)
@@ -78,8 +63,8 @@ if __name__=="__main__":
     plt.scatter(s_in_i, Y_i.flatten(), color='blue', alpha=0.5, label="Y_i first gen.")
     plt.scatter(s_in_f, Y_f.flatten(), color='green', alpha=0.5, label="Y_i last gen.")
     plt.legend(loc='best')
-    plt.savefig('./images/{}/{}-nodes-disparity.png'.format(topology, topology))
-    plt.savefig('./images/{}/{}-nodes-disparity.svg'.format(topology, topology))
+    plt.savefig('./images/{}/{}-nodes-disparity-{}-{}.png'.format(topology, topology, init_acc_le, fin_acc_ge))
+    plt.savefig('./images/{}/{}-nodes-disparity-{}-{}.svg'.format(topology, topology, init_acc_le, fin_acc_ge))
     plt.show() 
     # cumulative link weights
     plt.title('Cumulative link weights last layer')
@@ -88,8 +73,8 @@ if __name__=="__main__":
     plt.hist(init.flatten(), bins=50, color='red', alpha=0.5, histtype='step', label="first gen.", cumulative=True, normed=True)
     plt.hist(fin.flatten(), bins=50, color='blue', alpha=0.5, histtype='step', label="last gen.", cumulative=True, normed=True)
     plt.legend(loc='best')
-    plt.savefig('./images/{}/{}-cumulative-link-weights.png'.format(topology, topology))
-    plt.savefig('./images/{}/{}-cumulative-link-weights.svg'.format(topology, topology))
+    plt.savefig('./images/{}/{}-cumulative-link-weights-{}-{}.png'.format(topology, topology, init_acc_le, fin_acc_ge))
+    plt.savefig('./images/{}/{}-cumulative-link-weights-{}-{}.svg'.format(topology, topology, init_acc_le, fin_acc_ge))
     plt.show()
     # cumulative nodes strength
     plt.title('Cumulative nodes input strength last layer')
@@ -102,15 +87,15 @@ if __name__=="__main__":
     plt.hist(i_in, bins=50, color='red', alpha=0.5, histtype='step', label="first gen.", cumulative=True, normed=True)
     plt.hist(f_in, bins=50, color='blue', alpha=0.5, histtype='step', label="last gen.", cumulative=True, normed=True)
     plt.legend(loc='best')
-    plt.savefig('./images/{}/{}-cumulative-node-strength-in.png'.format(topology, topology))
-    plt.savefig('./images/{}/{}-cumulative-node-strength-in.svg'.format(topology, topology))
+    plt.savefig('./images/{}/{}-cumulative-node-strength-in-{}-{}.png'.format(topology, topology, init_acc_le, fin_acc_ge))
+    plt.savefig('./images/{}/{}-cumulative-node-strength-in-{}-{}.svg'.format(topology, topology, init_acc_le, fin_acc_ge))
     plt.show()
     plt.title('Cumulative nodes strength output last layer')
     plt.hist(i_out, bins=50, color='red', alpha=0.5, histtype='step', cumulative=True, normed=True)
     plt.hist(f_out, bins=50, color='blue', alpha=0.5, histtype='step', cumulative=True, normed=True)
     plt.legend(loc='best')
-    plt.savefig('./images/{}/{}-cumulative-node-strength-out.png'.format(topology, topology))
-    plt.savefig('./images/{}/{}-cumulative-node-strength-out.svg'.format(topology, topology))
+    plt.savefig('./images/{}/{}-cumulative-node-strength-out-{}-{}.png'.format(topology, topology, init_acc_le, fin_acc_ge))
+    plt.savefig('./images/{}/{}-cumulative-node-strength-out-{}-{}.svg'.format(topology, topology, init_acc_le, fin_acc_ge))
     plt.show()
     # draw the adjacency graph of the n-th percentile of the values
     n_perc = 95
@@ -122,7 +107,7 @@ if __name__=="__main__":
                             actual_size=(128,10),
                             title='Connectivity graph last layer {}-percentile'.format(n_perc),
                             showfig=True,
-                            savefig='./images/{}/{}-init-graph'.format(topology, topology))
+                            savefig='./images/{}/{}-init-graph-{}-{}'.format(topology, topology, init_acc_le, fin_acc_ge))
     #  fin
     fin_adj, prc = fin, np.percentile(fin, n_perc)
     fin_adj[fin_adj<prc] = 0.
@@ -131,4 +116,4 @@ if __name__=="__main__":
                             actual_size=(128,10),
                             title='Connectivity graph last layer {}-percentile'.format(n_perc),
                             showfig=True,
-                            savefig='./images/{}/{}-final-graph'.format(topology, topology))
+                            savefig='./images/{}/{}-final-graph-{}-{}'.format(topology, topology, init_acc_le, fin_acc_ge))
