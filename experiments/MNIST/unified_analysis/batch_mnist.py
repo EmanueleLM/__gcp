@@ -18,8 +18,8 @@ import draw_bipartite as db
 if __name__=="__main__":
     topology = 'fc'
     savefig = True
-    init_acc_le, fin_acc_ge = (0.0, 0.15), (0.95, 1.0)
-    init_prefix, fin_prefix = 'init', 'fin'
+    init_acc_le, fin_acc_ge = (0.9, 0.95), (0.95, 1.0)
+    init_prefix, fin_prefix = 'fin', 'fin'
     init = np.load('./results/{}_weights_npy/{}_weights_acc-{}-{}.npy'.format(topology, init_prefix, init_acc_le[0], init_acc_le[1]), allow_pickle=True)
     fin = np.load('./results/{}_weights_npy/{}_weights_acc-{}-{}.npy'.format(topology, fin_prefix, fin_acc_ge[0], fin_acc_ge[1]), allow_pickle=True)
     # nodes mean and variance

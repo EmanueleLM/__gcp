@@ -120,7 +120,7 @@ for seed_value in range(seed_range, seed_range+10):
                 np.asarray(model.get_weights()))
         """
         if cut_training is True:
-            dataset_size = int(0.25*np.random.rand()*len(x_train))
+            dataset_size = int(np.random.rand()*len(x_train))
         else:
             dataset_size = len(x_train)
         # train        
