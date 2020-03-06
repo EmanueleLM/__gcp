@@ -15,10 +15,12 @@ import metrics as mt
 import draw_bipartite as db
 
 
-if __name__=="__main__":
+save_couples = []
+
+for acc in np.arange(0.1, 1.0, 0.1):
     topology = 'fc'
     savefig = True
-    init_acc_le, fin_acc_ge = (0.9, 0.95), (0.95, 1.0)
+    init_acc_le, fin_acc_ge = (np.around(acc,2), np.around(acc+0.05,2)), (np.around(acc+0.05,2), np.around(acc+0.1,2))
     init_prefix, fin_prefix = 'fin', 'fin'
     init = np.load('./results/{}_weights_npy/{}_weights_acc-{}-{}.npy'.format(topology, init_prefix, init_acc_le[0], init_acc_le[1]), allow_pickle=True)
     fin = np.load('./results/{}_weights_npy/{}_weights_acc-{}-{}.npy'.format(topology, fin_prefix, fin_acc_ge[0], fin_acc_ge[1]), allow_pickle=True)
@@ -29,7 +31,7 @@ if __name__=="__main__":
     plt.legend(loc='best')
     if savefig is True:
         plt.savefig('./images/{}/{}-mean-variance-{}-{}.png'.format(topology, topology, init_acc_le, fin_acc_ge))
-        plt.savefig('./images/{}/{}-mean-variance-{}-{}.svg'.format(topology, topology, init_acc_le, fin_acc_ge))
+        plt.savefig('./images/{}/svg/{}-mean-variance-{}-{}.svg'.format(topology, topology, init_acc_le, fin_acc_ge))
     plt.show()
     # nodes strength, s_in and s_out
     s_in_i, s_out_i = np.sum(init, axis=1), np.sum(init, axis=0)
@@ -42,7 +44,7 @@ if __name__=="__main__":
     plt.legend(loc='best')
     if savefig is True:
         plt.savefig('./images/{}/{}-s-in_s-out-{}-{}.png'.format(topology, topology, init_acc_le, fin_acc_ge))
-        plt.savefig('./images/{}/{}-s-in_s-out-{}-{}.svg'.format(topology, topology, init_acc_le, fin_acc_ge))
+        plt.savefig('./images/{}/svg/{}-s-in_s-out-{}-{}.svg'.format(topology, topology, init_acc_le, fin_acc_ge))
     plt.show() 
     # nodes strength s = s_in + s_out
     prec_i, prec_f = 0., 0.
@@ -58,7 +60,7 @@ if __name__=="__main__":
     plt.legend(loc='best')
     if savefig is True:
         plt.savefig('./images/{}/{}-s-{}-{}.png'.format(topology, topology, init_acc_le, fin_acc_ge))
-        plt.savefig('./images/{}/{}-s-{}-{}.svg'.format(topology, topology, init_acc_le, fin_acc_ge))
+        plt.savefig('./images/{}/svg/{}-s-{}-{}.svg'.format(topology, topology, init_acc_le, fin_acc_ge))
     plt.show() 
     # nodes disparity Y_i
     s_in_i, s_in_f = np.sum(np.abs(init), axis=1), np.sum(np.abs(fin), axis=1)
@@ -70,7 +72,7 @@ if __name__=="__main__":
     plt.legend(loc='best')
     if savefig is True:
         plt.savefig('./images/{}/{}-nodes-disparity-{}-{}.png'.format(topology, topology, init_acc_le, fin_acc_ge))
-        plt.savefig('./images/{}/{}-nodes-disparity-{}-{}.svg'.format(topology, topology, init_acc_le, fin_acc_ge))
+        plt.savefig('./images/{}/svg/{}-nodes-disparity-{}-{}.svg'.format(topology, topology, init_acc_le, fin_acc_ge))
     plt.show() 
     # cumulative link weights
     plt.title('Cumulative link weights last layer')
@@ -81,7 +83,7 @@ if __name__=="__main__":
     plt.legend(loc='best')
     if savefig is True:
         plt.savefig('./images/{}/{}-cumulative-link-weights-{}-{}.png'.format(topology, topology, init_acc_le, fin_acc_ge))
-        plt.savefig('./images/{}/{}-cumulative-link-weights-{}-{}.svg'.format(topology, topology, init_acc_le, fin_acc_ge))
+        plt.savefig('./images/{}/svg/{}-cumulative-link-weights-{}-{}.svg'.format(topology, topology, init_acc_le, fin_acc_ge))
     plt.show()
     # cumulative nodes strength
     plt.title('Cumulative nodes input strength last layer')
@@ -96,7 +98,7 @@ if __name__=="__main__":
     plt.legend(loc='best')
     if savefig is True:
         plt.savefig('./images/{}/{}-cumulative-node-strength-in-{}-{}.png'.format(topology, topology, init_acc_le, fin_acc_ge))
-        plt.savefig('./images/{}/{}-cumulative-node-strength-in-{}-{}.svg'.format(topology, topology, init_acc_le, fin_acc_ge))
+        plt.savefig('./images/{}/svg/{}-cumulative-node-strength-in-{}-{}.svg'.format(topology, topology, init_acc_le, fin_acc_ge))
     plt.show()
     plt.title('Cumulative nodes strength output last layer')
     plt.hist(i_out, bins=50, color='red', alpha=0.5, histtype='step', cumulative=True, normed=True)
@@ -104,7 +106,7 @@ if __name__=="__main__":
     plt.legend(loc='best')
     if savefig is True:
         plt.savefig('./images/{}/{}-cumulative-node-strength-out-{}-{}.png'.format(topology, topology, init_acc_le, fin_acc_ge))
-        plt.savefig('./images/{}/{}-cumulative-node-strength-out-{}-{}.svg'.format(topology, topology, init_acc_le, fin_acc_ge))
+        plt.savefig('./images/{}/svg/{}-cumulative-node-strength-out-{}-{}.svg'.format(topology, topology, init_acc_le, fin_acc_ge))
     plt.show()
     # draw the adjacency graph of the n-th percentile of the values
     n_perc = 95
