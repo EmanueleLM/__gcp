@@ -18,7 +18,7 @@ import draw_bipartite as db
 save_couples = []
 
 for acc in np.arange(0.1, 1.0, 0.1):
-    topology = 'fc'
+    topology = 'cnn'
     savefig = True
     init_acc_le, fin_acc_ge = (np.around(acc,2), np.around(acc+0.05,2)), (np.around(acc+0.05,2), np.around(acc+0.1,2))
     init_prefix, fin_prefix = 'fin', 'fin'
