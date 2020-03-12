@@ -130,3 +130,22 @@ for acc in np.arange(0.1, 1.0, 0.1):
                             title='Connectivity graph last layer {}-percentile'.format(n_perc),
                             showfig=True,
                             savefig=save2)
+    
+# Print transition phase (accuracy-node disparity)
+colors = ['black', 'b', 'cyan', 'g', 'greenyellow', 'y', 'orange', 'orangered', 'r']
+alpha = [0.]
+for acc, i in zip(np.arange(0.1, 1.0, 0.1), range(10)):
+    topology = 'cnn'
+    savefig = True
+    init_acc_le, fin_acc_ge = (np.around(acc,2), np.around(acc+0.05,2)), (np.around(acc+0.05,2), np.around(acc+0.1,2))
+    init_prefix, fin_prefix = 'fin', 'fin'
+    init = np.load('./results/{}_weights_npy/{}_weights_acc-{}-{}.npy'.format(topology, init_prefix, init_acc_le[0], init_acc_le[1]), allow_pickle=True)
+    fin = np.load('./results/{}_weights_npy/{}_weights_acc-{}-{}.npy'.format(topology, fin_prefix, fin_acc_ge[0], fin_acc_ge[1]), allow_pickle=True)
+    # nodes disparity Y_i
+    s_in_i, s_in_f = np.sum(np.abs(init), axis=1), np.sum(np.abs(fin), axis=1)
+    Y_i = np.sum(init**2, axis=1)/s_in_i
+    Y_f = np.sum(fin**2, axis=1)/s_in_f            
+    plt.title('Nodes disparity last layer')
+    plt.scatter(acc, Y_i.flatten().mean(), color=colors[i], alpha=0.5, label="Y_i first acc {0:.2f}".format(acc))
+    plt.scatter(acc+0.05, Y_f.flatten().mean(), color=colors[i], alpha=1.0, label="Y_i last acc {0:.2f}".format(acc))
+    plt.legend(loc='best')
