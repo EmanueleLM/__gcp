@@ -17,10 +17,10 @@ import draw_bipartite as db
 
 save_couples = []
 
-for acc in np.arange(0.1, 1.0, 0.1):
-    topology = 'cnn'
+for acc in np.arange(0.1, 1.0, 0.05):
+    topology = 'fc'
     savefig = True
-    init_acc_le, fin_acc_ge = (np.around(acc,2), np.around(acc+0.05,2)), (np.around(acc+0.05,2), np.around(acc+0.1,2))
+    init_acc_le, fin_acc_ge = (np.around(acc,3), np.around(acc+0.025,3)), (np.around(acc+0.025,3), np.around(acc+0.05,3))
     init_prefix, fin_prefix = 'fin', 'fin'
     init = np.load('./results/{}_weights_npy/{}_weights_acc-{}-{}.npy'.format(topology, init_prefix, init_acc_le[0], init_acc_le[1]), allow_pickle=True)
     fin = np.load('./results/{}_weights_npy/{}_weights_acc-{}-{}.npy'.format(topology, fin_prefix, fin_acc_ge[0], fin_acc_ge[1]), allow_pickle=True)
@@ -115,29 +115,29 @@ for acc in np.arange(0.1, 1.0, 0.1):
     #  init
     init_adj, prc = init, np.percentile(init, n_perc)
     init_adj[init_adj<prc] = 0.
-    init_adj = np.hstack((init, np.zeros(shape=(128,118))))
+    init_adj = np.hstack((init, np.zeros(shape=(init.shape[0],init.shape[0]-10))))
     db.draw_bipartite_graph(init_adj, 
-                            actual_size=(128,10),
+                            actual_size=(init.shape[0],10),
                             title='Connectivity graph last layer {}-percentile'.format(n_perc),
                             showfig=True,
                             savefig=save1)
     #  fin
     fin_adj, prc = fin, np.percentile(fin, n_perc)
     fin_adj[fin_adj<prc] = 0.
-    fin_adj = np.hstack((fin, np.zeros(shape=(128,118))))
+    fin_adj = np.hstack((fin, np.zeros(shape=(init.shape[0],init.shape[0]-10))))
     db.draw_bipartite_graph(fin_adj, 
-                            actual_size=(128,10),
+                            actual_size=(init.shape[0],10),
                             title='Connectivity graph last layer {}-percentile'.format(n_perc),
                             showfig=True,
                             savefig=save2)
     
-# Print transition phase (accuracy-node disparity)
-colors = ['black', 'b', 'cyan', 'g', 'greenyellow', 'y', 'orange', 'orangered', 'r']
-alpha = [0.]
-for acc, i in zip(np.arange(0.1, 1.0, 0.1), range(10)):
-    topology = 'cnn'
-    savefig = True
-    init_acc_le, fin_acc_ge = (np.around(acc,2), np.around(acc+0.05,2)), (np.around(acc+0.05,2), np.around(acc+0.1,2))
+# Print transition phase with accuracy on x-axis
+# Node disparity)
+from colour import Color
+red = Color("green")
+colors = list(red.range_to(Color("red"),36))
+for acc, i in zip(np.arange(0.1, 0.975, 0.025), range(36)):
+    init_acc_le, fin_acc_ge = (np.around(acc,3), np.around(acc+0.025,3)), (np.around(acc+0.025,3), np.around(acc+0.05,3))
     init_prefix, fin_prefix = 'fin', 'fin'
     init = np.load('./results/{}_weights_npy/{}_weights_acc-{}-{}.npy'.format(topology, init_prefix, init_acc_le[0], init_acc_le[1]), allow_pickle=True)
     fin = np.load('./results/{}_weights_npy/{}_weights_acc-{}-{}.npy'.format(topology, fin_prefix, fin_acc_ge[0], fin_acc_ge[1]), allow_pickle=True)
@@ -145,7 +145,89 @@ for acc, i in zip(np.arange(0.1, 1.0, 0.1), range(10)):
     s_in_i, s_in_f = np.sum(np.abs(init), axis=1), np.sum(np.abs(fin), axis=1)
     Y_i = np.sum(init**2, axis=1)/s_in_i
     Y_f = np.sum(fin**2, axis=1)/s_in_f            
-    plt.title('Nodes disparity last layer')
-    plt.scatter(acc, Y_i.flatten().mean(), color=colors[i], alpha=0.5, label="Y_i first acc {0:.2f}".format(acc))
-    plt.scatter(acc+0.05, Y_f.flatten().mean(), color=colors[i], alpha=1.0, label="Y_i last acc {0:.2f}".format(acc))
-    plt.legend(loc='best')
+    plt.title('Nodes disparity')
+    plt.scatter(acc, Y_i.flatten().mean(), color=str(colors[i]), alpha=1.0, label="Y_i first acc {0:.2f}".format(acc))
+    plt.scatter(acc+0.025, Y_f.flatten().mean(), color=str(colors[i]), alpha=1.0, label="Y_i last acc {0:.2f}".format(acc))
+    #plt.legend(loc='best')
+plt.savefig('./images/{}/{}-transition-node-disparity.png'.format(topology, topology))
+plt.show()
+
+# Mean
+for acc, i in zip(np.arange(0.1, 0.975, 0.025), range(36)):
+    init_acc_le, fin_acc_ge = (np.around(acc,3), np.around(acc+0.025,3)), (np.around(acc+0.025,3), np.around(acc+0.05,3))
+    init_prefix, fin_prefix = 'fin', 'fin'
+    init = np.load('./results/{}_weights_npy/{}_weights_acc-{}-{}.npy'.format(topology, init_prefix, init_acc_le[0], init_acc_le[1]), allow_pickle=True)
+    fin = np.load('./results/{}_weights_npy/{}_weights_acc-{}-{}.npy'.format(topology, fin_prefix, fin_acc_ge[0], fin_acc_ge[1]), allow_pickle=True)        
+    plt.title('Mean')
+    plt.scatter(acc, init.mean(), color=str(colors[i]), alpha=1.0, label="Y_i first acc {0:.2f}".format(acc))
+    plt.scatter(acc+0.025, fin.mean(), color=str(colors[i]), alpha=1.0, label="Y_i last acc {0:.2f}".format(acc))
+    #plt.legend(loc='best')
+plt.savefig('./images/{}/{}-transition-mean.png'.format(topology, topology))
+plt.show()
+    
+# Variance
+for acc, i in zip(np.arange(0.1, 0.975, 0.025), range(36)):
+    init_acc_le, fin_acc_ge = (np.around(acc,3), np.around(acc+0.025,3)), (np.around(acc+0.025,3), np.around(acc+0.05,3))
+    init_prefix, fin_prefix = 'fin', 'fin'
+    init = np.load('./results/{}_weights_npy/{}_weights_acc-{}-{}.npy'.format(topology, init_prefix, init_acc_le[0], init_acc_le[1]), allow_pickle=True)
+    fin = np.load('./results/{}_weights_npy/{}_weights_acc-{}-{}.npy'.format(topology, fin_prefix, fin_acc_ge[0], fin_acc_ge[1]), allow_pickle=True)        
+    plt.title('Variance')
+    plt.scatter(acc, init.var(), color=str(colors[i]), alpha=1.0, label="Y_i first acc {0:.2f}".format(acc))
+    plt.scatter(acc+0.025, fin.var(), color=str(colors[i]), alpha=1.0, label="Y_i last acc {0:.2f}".format(acc))
+    #plt.legend(loc='best')
+plt.savefig('./images/{}/{}-transition-variance.png'.format(topology, topology))
+plt.show()
+    
+# Node strength
+for acc, i in zip(np.arange(0.1, 0.975, 0.025), range(36)):
+    init_acc_le, fin_acc_ge = (np.around(acc,3), np.around(acc+0.025,3)), (np.around(acc+0.025,3), np.around(acc+0.05,3))
+    init_prefix, fin_prefix = 'fin', 'fin'
+    init = np.load('./results/{}_weights_npy/{}_weights_acc-{}-{}.npy'.format(topology, init_prefix, init_acc_le[0], init_acc_le[1]), allow_pickle=True)
+    fin = np.load('./results/{}_weights_npy/{}_weights_acc-{}-{}.npy'.format(topology, fin_prefix, fin_acc_ge[0], fin_acc_ge[1]), allow_pickle=True)        
+    prec_i, prec_f = 0., 0.
+    s_in_i, s_out_i = np.sum(init, axis=1), np.sum(init, axis=0) 
+    s_in_f, s_out_f = np.sum(fin, axis=1), np.sum(fin, axis=0) 
+    s_i = s_in_i.flatten() + prec_i
+    prec_i = s_out_i.flatten()
+    s_f = s_in_f.flatten() + prec_f
+    prec_f = s_out_f.flatten()
+    plt.title('Node Strength')
+    plt.scatter(acc, s_i.flatten().mean(), color=str(colors[i]), alpha=1.0, label="Y_i first acc {0:.2f}".format(acc))
+    plt.scatter(acc+0.025, s_f.flatten().mean(), color=str(colors[i]), alpha=1.0, label="Y_i last acc {0:.2f}".format(acc))
+    #plt.legend(loc='best')
+plt.savefig('./images/{}/{}-transition-node-strength.png'.format(topology, topology))
+plt.show()
+    
+# Cumulative Link weights
+for acc, i in zip(np.arange(0.1, 0.975, 0.025), range(36)):
+    init_acc_le, fin_acc_ge = (np.around(acc,3), np.around(acc+0.025,3)), (np.around(acc+0.025,3), np.around(acc+0.05,3))
+    init_prefix, fin_prefix = 'fin', 'fin'
+    init = np.load('./results/{}_weights_npy/{}_weights_acc-{}-{}.npy'.format(topology, init_prefix, init_acc_le[0], init_acc_le[1]), allow_pickle=True)
+    fin = np.load('./results/{}_weights_npy/{}_weights_acc-{}-{}.npy'.format(topology, fin_prefix, fin_acc_ge[0], fin_acc_ge[1]), allow_pickle=True)        
+    tmp = cm.cumulative_distribution(init)
+    tmp_f = cm.cumulative_distribution(fin)
+    plt.title('Cumulative Link Weights')
+    plt.scatter(acc, tmp.mean(), color=str(colors[i]), alpha=1.0, label="Y_i first acc {0:.2f}".format(acc))
+    plt.scatter(acc+0.025, tmp_f.mean(), color=str(colors[i]), alpha=1.0, label="Y_i last acc {0:.2f}".format(acc))
+    #plt.legend(loc='best')
+plt.savefig('./images/{}/{}-transition-cumulative-link-weights.png'.format(topology, topology))
+plt.show()
+    
+# Cumulative Node Strenght
+for acc, i in zip(np.arange(0.1, 0.975, 0.025), range(36)):
+    init_acc_le, fin_acc_ge = (np.around(acc,3), np.around(acc+0.025,3)), (np.around(acc+0.025,3), np.around(acc+0.05,3))
+    init_prefix, fin_prefix = 'fin', 'fin'
+    init = np.load('./results/{}_weights_npy/{}_weights_acc-{}-{}.npy'.format(topology, init_prefix, init_acc_le[0], init_acc_le[1]), allow_pickle=True)
+    fin = np.load('./results/{}_weights_npy/{}_weights_acc-{}-{}.npy'.format(topology, fin_prefix, fin_acc_ge[0], fin_acc_ge[1]), allow_pickle=True)        
+    i_in, i_out = mt.nodes_strength(init)
+    f_in, f_out = mt.nodes_strength(fin)
+    i_in = cm.cumulative_distribution(i_in)
+    i_out = cm.cumulative_distribution(i_out)
+    f_in = cm.cumulative_distribution(f_in)
+    f_out = cm.cumulative_distribution(f_out) 
+    plt.title('Cumulative Node Strength')
+    plt.scatter(acc, f_in.mean(), color=str(colors[i]), alpha=1.0, label="Y_i first acc {0:.2f}".format(acc))
+    plt.scatter(acc+0.025, f_out.mean(), color=str(colors[i]), alpha=1.0, label="Y_i last acc {0:.2f}".format(acc))
+    #plt.legend(loc='best') 
+plt.savefig('./images/{}/{}-transition-cumulative-node-strenght.png'.format(topology, topology))
+plt.show()
