@@ -243,7 +243,7 @@ plt.savefig('./images/{}/{}-transition-std.png'.format(topology, topology))
 plt.show()
             
 # Cumulative Link weights
-arange_accuracy = np.arange(0.7, 0.975, 0.025)
+arange_accuracy = np.arange(0.1, 0.975, 0.025)
 num_colors = len(arange_accuracy)
 colors_cumulative = list(red.range_to(Color("red"),num_colors))
 for acc, i in zip(arange_accuracy, range(num_colors)):
