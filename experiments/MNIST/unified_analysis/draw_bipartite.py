@@ -31,7 +31,7 @@ def draw_bipartite_graph(ls, actual_size, title='', showfig=True, savefig=''):
     pos_a={}
     x=0.100
     const=0.100
-    const_out = 0.300
+    const_out = 0.300 
     y=1.0
     for i in range(len(a)):
         pos_a[a[i]]=[x,y-i*const]    

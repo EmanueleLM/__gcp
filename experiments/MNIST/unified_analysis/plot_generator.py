@@ -313,7 +313,7 @@ db.draw_bipartite_graph(init,
                         actual_size=(init.shape[0],init.shape[1]),
                         title='Connectivity graph last layer 0.1-0.125-accuracy',
                         showfig=True,
-                        savefig=save1)
+                        savefig=save1) 
 #  fin
 fin = np.load('./results/{}_weights_npy/{}_weights_acc-0.975-1.0.npy'.format(topology, fin_prefix), allow_pickle=True)
 db.draw_bipartite_graph(fin, 
