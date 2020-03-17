@@ -242,7 +242,7 @@ plt.ylabel('Standard Deviation')
 plt.savefig('./images/{}/{}-transition-std.png'.format(topology, topology))
 plt.show()
      
-# Cumulative distributions
+# Cumulative distributions      
 step = 0.1
 arange_accuracy = np.arange(0.1, 0.9, step)       
 num_colors = len(arange_accuracy)
@@ -254,8 +254,10 @@ for acc, i in zip(arange_accuracy, range(num_colors)):
     init = np.load('./results/{}_weights_npy/{}_weights_acc-{}-{}.npy'.format(topology, init_prefix, init_acc_le[0], init_acc_le[1]), allow_pickle=True)
     fin = np.load('./results/{}_weights_npy/{}_weights_acc-{}-{}.npy'.format(topology, fin_prefix, fin_acc_ge[0], fin_acc_ge[1]), allow_pickle=True)        
     plt.title('Cumulative Link Weights Range {0:.2f}-{1:.2f} (accuracy step {2:.3f})'.format(arange_accuracy[0], 0.05+arange_accuracy[-1], step))
-    plt.hist(init.flatten(), bins=50, color=str(colors_cumulative[i]), histtype='step', alpha=1.0, label="Y_i first acc {0:.2f}".format(acc), cumulative=True, normed=True)
-    plt.hist(fin.flatten(), bins=50, color=str(colors_cumulative[i]), histtype='step', alpha=1.0, label="Y_i last acc {0:.2f}".format(acc), cumulative=True, normed=True)
+    bins1, bins2 = np.histogram(init.flatten(), 51)[-1], np.histogram(fin.flatten(), 50)[-1]
+    bins1[-1] = bins2[-1] = np.inf
+    plt.hist(init.flatten(), bins=bins1, color=str(colors_cumulative[i]), histtype='step', alpha=1.0, label="Y_i first acc {0:.2f}".format(acc), cumulative=True, normed=True)
+    plt.hist(fin.flatten(), bins=bins2, color=str(colors_cumulative[i]), histtype='step', alpha=1.0, label="Y_i last acc {0:.2f}".format(acc), cumulative=True, normed=True)
     #plt.legend(loc='best')
 plt.xlabel('Weights')
 plt.ylabel('Prob(w<W)')
@@ -273,8 +275,10 @@ for acc, i in zip(arange_accuracy, range(num_colors)):
     s_i = s_in_i.flatten()
     s_f = s_in_f.flatten()
     plt.title('Cumulative Node Strength Input Layer Range {0:.2f}-{1:.2f} (accuracy step {2:.3f})'.format(arange_accuracy[0], 0.05+arange_accuracy[-1], step))
-    plt.hist(s_i.flatten(), bins=50, color=str(colors_cumulative[i]), histtype='step', alpha=1.0, label="Y_i first acc {0:.2f}".format(acc), cumulative=True, normed=True)
-    plt.hist(s_f.flatten(), bins=50, color=str(colors_cumulative[i]), histtype='step', alpha=1.0, label="Y_i last acc {0:.2f}".format(acc), cumulative=True, normed=True)
+    bins1, bins2 = np.histogram(init.flatten(), 51)[-1], np.histogram(fin.flatten(), 50)[-1]
+    bins1[-1] = bins2[-1] = np.inf
+    plt.hist(s_i.flatten(), bins=bins1, color=str(colors_cumulative[i]), histtype='step', alpha=1.0, label="Y_i first acc {0:.2f}".format(acc), cumulative=True, normed=True)
+    plt.hist(s_f.flatten(), bins=bins2, color=str(colors_cumulative[i]), histtype='step', alpha=1.0, label="Y_i last acc {0:.2f}".format(acc), cumulative=True, normed=True)
     #plt.legend(loc='best')
 plt.xlabel('Node Strength')
 plt.ylabel('Prob(s<S)')
@@ -292,8 +296,10 @@ for acc, i in zip(arange_accuracy, range(num_colors)):
     s_i = s_out_i.flatten()
     s_f = s_out_f.flatten()
     plt.title('Cumulative Node Strength Output Layer Range {0:.2f}-{1:.2f} (accuracy step {2:.3f})'.format(arange_accuracy[0], 0.05+arange_accuracy[-1], step))
-    plt.hist(s_i.flatten(), bins=50, color=str(colors_cumulative[i]), histtype='step', alpha=1.0, label="Y_i first acc {0:.2f}".format(acc), cumulative=True, normed=True)
-    plt.hist(s_f.flatten(), bins=50, color=str(colors_cumulative[i]), histtype='step', alpha=1.0, label="Y_i last acc {0:.2f}".format(acc), cumulative=True, normed=True)
+    bins1, bins2 = np.histogram(init.flatten(), 51)[-1], np.histogram(fin.flatten(), 50)[-1]
+    bins1[-1] = bins2[-1] = np.inf
+    plt.hist(s_i.flatten(), bins=bins1, color=str(colors_cumulative[i]), histtype='step', alpha=1.0, label="Y_i first acc {0:.2f}".format(acc), cumulative=True, normed=True)
+    plt.hist(s_f.flatten(), bins=bins2, color=str(colors_cumulative[i]), histtype='step', alpha=1.0, label="Y_i last acc {0:.2f}".format(acc), cumulative=True, normed=True)
     #plt.legend(loc='best')
 plt.xlabel('Node Strength')
 plt.ylabel('Prob(s<S)')
