@@ -241,17 +241,19 @@ plt.xlabel('Accuracy')
 plt.ylabel('Standard Deviation')
 plt.savefig('./images/{}/{}-transition-std.png'.format(topology, topology))
 plt.show()
-            
-# Cumulative Link weights
-arange_accuracy = np.arange(0.1, 0.975, 0.025)
+     
+# Cumulative distributions
+step = 0.1
+arange_accuracy = np.arange(0.1, 0.9, step)       
 num_colors = len(arange_accuracy)
 colors_cumulative = list(red.range_to(Color("red"),num_colors))
+# Cumulative Link weights
 for acc, i in zip(arange_accuracy, range(num_colors)):
     init_acc_le, fin_acc_ge = (np.around(acc,3), np.around(acc+0.025,3)), (np.around(acc+0.025,3), np.around(acc+0.05,3))
     init_prefix, fin_prefix = 'fin', 'fin'
     init = np.load('./results/{}_weights_npy/{}_weights_acc-{}-{}.npy'.format(topology, init_prefix, init_acc_le[0], init_acc_le[1]), allow_pickle=True)
     fin = np.load('./results/{}_weights_npy/{}_weights_acc-{}-{}.npy'.format(topology, fin_prefix, fin_acc_ge[0], fin_acc_ge[1]), allow_pickle=True)        
-    plt.title('Cumulative Link Weights Range {0:.2f}-{1:.2f}'.format(arange_accuracy[0], 0.05+arange_accuracy[-1]))
+    plt.title('Cumulative Link Weights Range {0:.2f}-{1:.2f} (accuracy step {2:.3f})'.format(arange_accuracy[0], 0.05+arange_accuracy[-1], step))
     plt.hist(init.flatten(), bins=50, color=str(colors_cumulative[i]), histtype='step', alpha=1.0, label="Y_i first acc {0:.2f}".format(acc), cumulative=True, normed=True)
     plt.hist(fin.flatten(), bins=50, color=str(colors_cumulative[i]), histtype='step', alpha=1.0, label="Y_i last acc {0:.2f}".format(acc), cumulative=True, normed=True)
     #plt.legend(loc='best')
@@ -261,9 +263,6 @@ plt.savefig('./images/{}/{}-cumulative-link-weights.png'.format(topology, topolo
 plt.show()
     
 # Cumulative Node Strenght Input
-arange_accuracy = np.arange(0.1, 0.975, 0.025)
-num_colors = len(arange_accuracy)
-colors_cumulative = list(red.range_to(Color("red"),num_colors))
 for acc, i in zip(arange_accuracy, range(num_colors)):
     init_acc_le, fin_acc_ge = (np.around(acc,3), np.around(acc+0.025,3)), (np.around(acc+0.025,3), np.around(acc+0.05,3))
     init_prefix, fin_prefix = 'fin', 'fin'
@@ -273,7 +272,7 @@ for acc, i in zip(arange_accuracy, range(num_colors)):
     s_in_f, _ = np.sum(fin, axis=1), np.sum(fin, axis=0)
     s_i = s_in_i.flatten()
     s_f = s_in_f.flatten()
-    plt.title('Cumulative Node Strength Input Layer Range {0:.2f}-{1:.2f}'.format(arange_accuracy[0], 0.05+arange_accuracy[-1]))
+    plt.title('Cumulative Node Strength Input Layer Range {0:.2f}-{1:.2f} (accuracy step {2:.3f})'.format(arange_accuracy[0], 0.05+arange_accuracy[-1], step))
     plt.hist(s_i.flatten(), bins=50, color=str(colors_cumulative[i]), histtype='step', alpha=1.0, label="Y_i first acc {0:.2f}".format(acc), cumulative=True, normed=True)
     plt.hist(s_f.flatten(), bins=50, color=str(colors_cumulative[i]), histtype='step', alpha=1.0, label="Y_i last acc {0:.2f}".format(acc), cumulative=True, normed=True)
     #plt.legend(loc='best')
@@ -283,9 +282,6 @@ plt.savefig('./images/{}/{}-cumulative-node-strenght-in.png'.format(topology, to
 plt.show()
 
 # Cumulative Node Strenght Output
-arange_accuracy = np.arange(0.1, 0.975, 0.025)
-num_colors = len(arange_accuracy)
-colors_cumulative = list(red.range_to(Color("red"),num_colors))
 for acc, i in zip(arange_accuracy, range(num_colors)):
     init_acc_le, fin_acc_ge = (np.around(acc,3), np.around(acc+0.025,3)), (np.around(acc+0.025,3), np.around(acc+0.05,3))
     init_prefix, fin_prefix = 'fin', 'fin'
@@ -295,7 +291,7 @@ for acc, i in zip(arange_accuracy, range(num_colors)):
     _, s_out_f = np.sum(fin, axis=1), np.sum(fin, axis=0)
     s_i = s_out_i.flatten()
     s_f = s_out_f.flatten()
-    plt.title('Cumulative Node Strength Output Layer Range {0:.2f}-{1:.2f}'.format(arange_accuracy[0], 0.05+arange_accuracy[-1]))
+    plt.title('Cumulative Node Strength Output Layer Range {0:.2f}-{1:.2f} (accuracy step {2:.3f})'.format(arange_accuracy[0], 0.05+arange_accuracy[-1], step))
     plt.hist(s_i.flatten(), bins=50, color=str(colors_cumulative[i]), histtype='step', alpha=1.0, label="Y_i first acc {0:.2f}".format(acc), cumulative=True, normed=True)
     plt.hist(s_f.flatten(), bins=50, color=str(colors_cumulative[i]), histtype='step', alpha=1.0, label="Y_i last acc {0:.2f}".format(acc), cumulative=True, normed=True)
     #plt.legend(loc='best')

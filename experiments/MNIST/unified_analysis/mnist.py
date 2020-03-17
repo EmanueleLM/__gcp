@@ -23,7 +23,7 @@ parser.add_argument("-a", "--architecture", dest="architecture", default='fc', t
 parser.add_argument("-c", "--cut-training", dest="cut_training", action='store_true',
                     help="Enable the selection of the size of the dataset randomly from 1k to 60k")
 parser.add_argument("-s", "--seed", dest="seed_range", default=0, type=int,
-                    help="Seed range (from n to n+100).")  
+                    help="Seed range (from n to n+5000).")  
 parser.add_argument("-min", "--min", dest="min", default=0.0, type=float,
                     help="Min accuracy values for final models (discard anything below).")
 parser.add_argument("-max", "--max", dest="max", default=1.0, type=float,
@@ -37,7 +37,7 @@ min_range_fin, max_range_fin = args.min, args.max
 # import data, once
 batch_size = np.random.randint(32,128)
 num_classes = 10
-epochs = 3
+epochs = 5
 # input image dimensions
 img_rows, img_cols = 28, 28
 # the data, split between train and test sets
@@ -103,8 +103,8 @@ for seed_value in range(seed_range, seed_range+5000):
             model.add(Flatten())
         elif architecture == 'fc':
             model.add(Flatten())
-            model.add(Dense(np.random.randint(128, 256), activation='relu',kernel_initializer=initializers[key], bias_initializer='zeros'))
-            model.add(Dense(np.random.randint(128, 256), activation='relu',kernel_initializer=initializers[key], bias_initializer='zeros'))
+            model.add(Dense(np.random.randint(200, 256), activation='relu',kernel_initializer=initializers[key], bias_initializer='zeros'))
+            model.add(Dense(np.random.randint(200, 256), activation='relu',kernel_initializer=initializers[key], bias_initializer='zeros'))
         model.add(Dense(32, activation='relu',kernel_initializer=initializers[key], bias_initializer='zeros'))
         model.add(Dense(num_classes, activation='softmax'))
         
@@ -136,145 +136,145 @@ for seed_value in range(seed_range, seed_range+5000):
         accuracy = model.evaluate(x_test, y_test, verbose=0)[1]
         if accuracy >= 0.975 and accuracy <= 1.0:
             acc_prefix = '0.975-1.0/'
-            if len(next(os.walk(dst+acc_prefix))[2]) <= 500:
+            if len(next(os.walk(dst+acc_prefix))[2]) <= 1000:
                 np.save(dst + acc_prefix + 'f_seed-{}_init-{}_score-{:.3f}.npy'.format(seed_value,key,accuracy),np.asarray(model.get_weights()))
         elif accuracy >= 0.95 and accuracy <= 0.975:
             acc_prefix = '0.95-0.975/'
-            if len(next(os.walk(dst+acc_prefix))[2]) <= 500:
+            if len(next(os.walk(dst+acc_prefix))[2]) <= 1000:
                 np.save(dst + acc_prefix + 'f_seed-{}_init-{}_score-{:.3f}.npy'.format(seed_value,key,accuracy),np.asarray(model.get_weights()))
         elif accuracy >= 0.925 and accuracy <= 0.95:
             acc_prefix = '0.925-0.95/'
-            if len(next(os.walk(dst+acc_prefix))[2]) <= 500:
+            if len(next(os.walk(dst+acc_prefix))[2]) <= 1000:
                 np.save(dst + acc_prefix + 'f_seed-{}_init-{}_score-{:.3f}.npy'.format(seed_value,key,accuracy),np.asarray(model.get_weights()))
         elif accuracy >= 0.9 and accuracy <= 0.925:
             acc_prefix = '0.9-0.925/'
-            if len(next(os.walk(dst+acc_prefix))[2]) <= 500:
+            if len(next(os.walk(dst+acc_prefix))[2]) <= 1000:
                 np.save(dst + acc_prefix + 'f_seed-{}_init-{}_score-{:.3f}.npy'.format(seed_value,key,accuracy),np.asarray(model.get_weights()))
         elif accuracy >= 0.875 and accuracy <= 0.9:
             acc_prefix = '0.875-0.9/'
-            if len(next(os.walk(dst+acc_prefix))[2]) <= 500:
+            if len(next(os.walk(dst+acc_prefix))[2]) <= 1000:
                 np.save(dst + acc_prefix + 'f_seed-{}_init-{}_score-{:.3f}.npy'.format(seed_value,key,accuracy),np.asarray(model.get_weights()))
         elif accuracy >= 0.85 and accuracy <= 0.875:
             acc_prefix = '0.85-0.875/'
-            if len(next(os.walk(dst+acc_prefix))[2]) <= 500:
+            if len(next(os.walk(dst+acc_prefix))[2]) <= 1000:
                 np.save(dst + acc_prefix + 'f_seed-{}_init-{}_score-{:.3f}.npy'.format(seed_value,key,accuracy),np.asarray(model.get_weights()))
         elif accuracy >= 0.825 and accuracy <= 0.85:
             acc_prefix = '0.825-0.85/'
-            if len(next(os.walk(dst+acc_prefix))[2]) <= 500:
+            if len(next(os.walk(dst+acc_prefix))[2]) <= 1000:
                 np.save(dst + acc_prefix + 'f_seed-{}_init-{}_score-{:.3f}.npy'.format(seed_value,key,accuracy),np.asarray(model.get_weights()))
         elif accuracy >= 0.8 and accuracy <= 0.825:
             acc_prefix = '0.8-0.825/'
-            if len(next(os.walk(dst+acc_prefix))[2]) <= 500:
+            if len(next(os.walk(dst+acc_prefix))[2]) <= 1000:
                 np.save(dst + acc_prefix + 'f_seed-{}_init-{}_score-{:.3f}.npy'.format(seed_value,key,accuracy),np.asarray(model.get_weights()))
         elif accuracy >= 0.775 and accuracy <= 0.8:
             acc_prefix = '0.775-0.8/'
-            if len(next(os.walk(dst+acc_prefix))[2]) <= 500:
+            if len(next(os.walk(dst+acc_prefix))[2]) <= 1000:
                 np.save(dst + acc_prefix + 'f_seed-{}_init-{}_score-{:.3f}.npy'.format(seed_value,key,accuracy),np.asarray(model.get_weights()))
         elif accuracy >= 0.75 and accuracy <= 0.775:
             acc_prefix = '0.75-0.775/'
-            if len(next(os.walk(dst+acc_prefix))[2]) <= 500:
+            if len(next(os.walk(dst+acc_prefix))[2]) <= 1000:
                 np.save(dst + acc_prefix + 'f_seed-{}_init-{}_score-{:.3f}.npy'.format(seed_value,key,accuracy),np.asarray(model.get_weights()))
         elif accuracy >= 0.725 and accuracy <= 0.75:
             acc_prefix = '0.725-0.75/'
-            if len(next(os.walk(dst+acc_prefix))[2]) <= 500:
+            if len(next(os.walk(dst+acc_prefix))[2]) <= 1000:
                 np.save(dst + acc_prefix + 'f_seed-{}_init-{}_score-{:.3f}.npy'.format(seed_value,key,accuracy),np.asarray(model.get_weights()))
         elif accuracy >= 0.7 and accuracy <= 0.725:
             acc_prefix = '0.7-0.725/'
-            if len(next(os.walk(dst+acc_prefix))[2]) <= 500:
+            if len(next(os.walk(dst+acc_prefix))[2]) <= 1000:
                 np.save(dst + acc_prefix + 'f_seed-{}_init-{}_score-{:.3f}.npy'.format(seed_value,key,accuracy),np.asarray(model.get_weights()))
         elif accuracy >= 0.675 and accuracy <= 0.7:
             acc_prefix = '0.675-0.7/'
-            if len(next(os.walk(dst+acc_prefix))[2]) <= 500:
+            if len(next(os.walk(dst+acc_prefix))[2]) <= 1000:
                 np.save(dst + acc_prefix + 'f_seed-{}_init-{}_score-{:.3f}.npy'.format(seed_value,key,accuracy),np.asarray(model.get_weights()))
         elif accuracy >= 0.65 and accuracy <= 0.675:
             acc_prefix = '0.65-0.675/'
-            if len(next(os.walk(dst+acc_prefix))[2]) <= 500:
+            if len(next(os.walk(dst+acc_prefix))[2]) <= 1000:
                 np.save(dst + acc_prefix + 'f_seed-{}_init-{}_score-{:.3f}.npy'.format(seed_value,key,accuracy),np.asarray(model.get_weights()))
         elif accuracy >= 0.625 and accuracy <= 0.65:
             acc_prefix = '0.625-0.65/'
-            if len(next(os.walk(dst+acc_prefix))[2]) <= 500:
+            if len(next(os.walk(dst+acc_prefix))[2]) <= 1000:
                 np.save(dst + acc_prefix + 'f_seed-{}_init-{}_score-{:.3f}.npy'.format(seed_value,key,accuracy),np.asarray(model.get_weights()))
         elif accuracy >= 0.6 and accuracy <= 0.625:
             acc_prefix = '0.6-0.625/'
-            if len(next(os.walk(dst+acc_prefix))[2]) <= 500:
+            if len(next(os.walk(dst+acc_prefix))[2]) <= 1000:
                 np.save(dst + acc_prefix + 'f_seed-{}_init-{}_score-{:.3f}.npy'.format(seed_value,key,accuracy),np.asarray(model.get_weights()))
         elif accuracy >= 0.575 and accuracy <= 0.6:
             acc_prefix = '0.575-0.6/'
-            if len(next(os.walk(dst+acc_prefix))[2]) <= 500:
+            if len(next(os.walk(dst+acc_prefix))[2]) <= 1000:
                 np.save(dst + acc_prefix + 'f_seed-{}_init-{}_score-{:.3f}.npy'.format(seed_value,key,accuracy),np.asarray(model.get_weights()))
         elif accuracy >= 0.55 and accuracy <= 0.575:
             acc_prefix = '0.55-0.575/'
-            if len(next(os.walk(dst+acc_prefix))[2]) <= 500:
+            if len(next(os.walk(dst+acc_prefix))[2]) <= 1000:
                 np.save(dst + acc_prefix + 'f_seed-{}_init-{}_score-{:.3f}.npy'.format(seed_value,key,accuracy),np.asarray(model.get_weights()))
         elif accuracy >= 0.525 and accuracy <= 0.55:
             acc_prefix = '0.525-0.55/'
-            if len(next(os.walk(dst+acc_prefix))[2]) <= 500:
+            if len(next(os.walk(dst+acc_prefix))[2]) <= 1000:
                 np.save(dst + acc_prefix + 'f_seed-{}_init-{}_score-{:.3f}.npy'.format(seed_value,key,accuracy),np.asarray(model.get_weights()))
         elif accuracy >= 0.5 and accuracy <= 0.525:
             acc_prefix = '0.5-0.525/'
-            if len(next(os.walk(dst+acc_prefix))[2]) <= 500:
+            if len(next(os.walk(dst+acc_prefix))[2]) <= 1000:
                 np.save(dst + acc_prefix + 'f_seed-{}_init-{}_score-{:.3f}.npy'.format(seed_value,key,accuracy),np.asarray(model.get_weights()))
         elif accuracy >= 0.475 and accuracy <= 0.5:
             acc_prefix = '0.475-0.5/'
-            if len(next(os.walk(dst+acc_prefix))[2]) <= 500:
+            if len(next(os.walk(dst+acc_prefix))[2]) <= 1000:
                 np.save(dst + acc_prefix + 'f_seed-{}_init-{}_score-{:.3f}.npy'.format(seed_value,key,accuracy),np.asarray(model.get_weights()))
         elif accuracy >= 0.45 and accuracy <= 0.475:
             acc_prefix = '0.45-0.475/'
-            if len(next(os.walk(dst+acc_prefix))[2]) <= 500:
+            if len(next(os.walk(dst+acc_prefix))[2]) <= 1000:
                 np.save(dst + acc_prefix + 'f_seed-{}_init-{}_score-{:.3f}.npy'.format(seed_value,key,accuracy),np.asarray(model.get_weights()))
         elif accuracy >= 0.425 and accuracy <= 0.45:
             acc_prefix = '0.425-0.45/'
-            if len(next(os.walk(dst+acc_prefix))[2]) <= 500:
+            if len(next(os.walk(dst+acc_prefix))[2]) <= 1000:
                 np.save(dst + acc_prefix + 'f_seed-{}_init-{}_score-{:.3f}.npy'.format(seed_value,key,accuracy),np.asarray(model.get_weights()))
         elif accuracy >= 0.4 and accuracy <= 0.425:
             acc_prefix = '0.4-0.425/'
-            if len(next(os.walk(dst+acc_prefix))[2]) <= 500:
+            if len(next(os.walk(dst+acc_prefix))[2]) <= 1000:
                 np.save(dst + acc_prefix + 'f_seed-{}_init-{}_score-{:.3f}.npy'.format(seed_value,key,accuracy),np.asarray(model.get_weights()))
         elif accuracy >= 0.375 and accuracy <= 0.4:
             acc_prefix = '0.375-0.4/'
-            if len(next(os.walk(dst+acc_prefix))[2]) <= 500:
+            if len(next(os.walk(dst+acc_prefix))[2]) <= 1000:
                 np.save(dst + acc_prefix + 'f_seed-{}_init-{}_score-{:.3f}.npy'.format(seed_value,key,accuracy),np.asarray(model.get_weights()))
         elif accuracy >= 0.35 and accuracy <= 0.375:
             acc_prefix = '0.35-0.375/'
-            if len(next(os.walk(dst+acc_prefix))[2]) <= 500:
+            if len(next(os.walk(dst+acc_prefix))[2]) <= 1000:
                 np.save(dst + acc_prefix + 'f_seed-{}_init-{}_score-{:.3f}.npy'.format(seed_value,key,accuracy),np.asarray(model.get_weights()))
         elif accuracy >= 0.325 and accuracy <= 0.35:
             acc_prefix = '0.325-0.35/'
-            if len(next(os.walk(dst+acc_prefix))[2]) <= 500:
+            if len(next(os.walk(dst+acc_prefix))[2]) <= 1000:
                 np.save(dst + acc_prefix + 'f_seed-{}_init-{}_score-{:.3f}.npy'.format(seed_value,key,accuracy),np.asarray(model.get_weights()))
         elif accuracy >= 0.3 and accuracy <= 0.325:
             acc_prefix = '0.3-0.325/'
-            if len(next(os.walk(dst+acc_prefix))[2]) <= 500:
+            if len(next(os.walk(dst+acc_prefix))[2]) <= 1000:
                 np.save(dst + acc_prefix + 'f_seed-{}_init-{}_score-{:.3f}.npy'.format(seed_value,key,accuracy),np.asarray(model.get_weights()))
         elif accuracy >= 0.275 and accuracy <= 0.3:
             acc_prefix = '0.275-0.3/'
-            if len(next(os.walk(dst+acc_prefix))[2]) <= 500:
+            if len(next(os.walk(dst+acc_prefix))[2]) <= 1000:
                 np.save(dst + acc_prefix + 'f_seed-{}_init-{}_score-{:.3f}.npy'.format(seed_value,key,accuracy),np.asarray(model.get_weights()))
         elif accuracy >= 0.25 and accuracy <= 0.275:
             acc_prefix = '0.25-0.275/'
-            if len(next(os.walk(dst+acc_prefix))[2]) <= 500:
+            if len(next(os.walk(dst+acc_prefix))[2]) <= 1000:
                 np.save(dst + acc_prefix + 'f_seed-{}_init-{}_score-{:.3f}.npy'.format(seed_value,key,accuracy),np.asarray(model.get_weights()))
         elif accuracy >= 0.225 and accuracy <= 0.25:
             acc_prefix = '0.225-0.25/'
-            if len(next(os.walk(dst+acc_prefix))[2]) <= 500:
+            if len(next(os.walk(dst+acc_prefix))[2]) <= 1000:
                 np.save(dst + acc_prefix + 'f_seed-{}_init-{}_score-{:.3f}.npy'.format(seed_value,key,accuracy),np.asarray(model.get_weights()))
         elif accuracy >= 0.2 and accuracy <= 0.225:
             acc_prefix = '0.2-0.225/'
-            if len(next(os.walk(dst+acc_prefix))[2]) <= 500:
+            if len(next(os.walk(dst+acc_prefix))[2]) <= 1000:
                 np.save(dst + acc_prefix + 'f_seed-{}_init-{}_score-{:.3f}.npy'.format(seed_value,key,accuracy),np.asarray(model.get_weights()))
         elif accuracy >= 0.175 and accuracy <= 0.2:
             acc_prefix = '0.175-0.2/'
-            if len(next(os.walk(dst+acc_prefix))[2]) <= 500:
+            if len(next(os.walk(dst+acc_prefix))[2]) <= 1000:
                 np.save(dst + acc_prefix + 'f_seed-{}_init-{}_score-{:.3f}.npy'.format(seed_value,key,accuracy),np.asarray(model.get_weights()))
         elif accuracy >= 0.15 and accuracy <= 0.175:
             acc_prefix = '0.15-0.175/'
-            if len(next(os.walk(dst+acc_prefix))[2]) <= 500:
+            if len(next(os.walk(dst+acc_prefix))[2]) <= 1000:
                 np.save(dst + acc_prefix + 'f_seed-{}_init-{}_score-{:.3f}.npy'.format(seed_value,key,accuracy),np.asarray(model.get_weights()))
         elif accuracy >= 0.125 and accuracy <= 0.15:
             acc_prefix = '0.125-0.15/'
-            if len(next(os.walk(dst+acc_prefix))[2]) <= 500:
+            if len(next(os.walk(dst+acc_prefix))[2]) <= 1000:
                 np.save(dst + acc_prefix + 'f_seed-{}_init-{}_score-{:.3f}.npy'.format(seed_value,key,accuracy),np.asarray(model.get_weights()))
         elif accuracy >= 0.1 and accuracy <= 0.125:
             acc_prefix = '0.1-0.125/'
-            if len(next(os.walk(dst+acc_prefix))[2]) <= 500:
+            if len(next(os.walk(dst+acc_prefix))[2]) <= 1000:
                 np.save(dst + acc_prefix + 'f_seed-{}_init-{}_score-{:.3f}.npy'.format(seed_value,key,accuracy),np.asarray(model.get_weights()))
