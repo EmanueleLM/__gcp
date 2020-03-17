@@ -60,12 +60,13 @@ y_test = keras.utils.to_categorical(y_test, num_classes)
 
 initializers = {}
 initializers['glorot-normal'] = keras.initializers.glorot_normal(seed=seed_value)
-num_kernels = 1
-kernel_size = 18
+num_kernels = 5
+kernel_size = 28
 model = Sequential()
 model.add(Conv2D(num_kernels, kernel_size=(kernel_size, kernel_size),activation='relu', input_shape=input_shape, kernel_initializer=initializers['glorot-normal'], bias_initializer='zeros'))
 model.add(Flatten())
-model.add(Dense(16, activation='relu', kernel_initializer=initializers['glorot-normal'], bias_initializer='zeros'))
+#model.add(Dense(kernel_size, activation='relu', kernel_initializer=initializers['glorot-normal'], bias_initializer='zeros'))
+model.add(Dense(32, activation='relu', kernel_initializer=initializers['glorot-normal'], bias_initializer='zeros'))
 model.add(Dense(num_classes, activation='softmax', kernel_initializer=initializers['glorot-normal'], bias_initializer='zeros'))
 
 model.compile(loss=keras.losses.categorical_crossentropy,
@@ -73,7 +74,7 @@ model.compile(loss=keras.losses.categorical_crossentropy,
               metrics=['accuracy'])
 model.fit(x_train, y_train,
           batch_size=batch_size,
-          epochs=2,
+          epochs=10,
           verbose=1,
           validation_data=(x_test, y_test))
 
