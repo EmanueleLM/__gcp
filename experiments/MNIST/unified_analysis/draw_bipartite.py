@@ -51,7 +51,7 @@ def draw_bipartite_graph(ls, actual_size, title='', showfig=True, savefig=''):
     plt.title(title)
     if savefig != '':
         plt.savefig(savefig+'.png', bbox_inches='tight')
-        plt.savefig(savefig+'.svg', bbox_inches='tight')
+        #plt.savefig(savefig+'.svg', bbox_inches='tight')
     if showfig is True:
         plt.show()
     return g

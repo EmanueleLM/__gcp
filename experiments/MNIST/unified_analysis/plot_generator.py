@@ -220,17 +220,57 @@ plt.savefig('./images/{}/{}-cumulative-node-strenght-out.png'.format(topology, t
 plt.show()
 
 # draw the adjacency graph of last layer, trained and non-trained networks
-save1 = './images/{}/{}-init-graph-{}-{}'.format(topology, topology, init_acc_le, fin_acc_ge)
-save2 = './images/{}/{}-final-graph-{}-{}'.format(topology, topology, init_acc_le, fin_acc_ge)
+# eventually cutoff the quantiles
+# Negative weights
+init_prefix, fin_prefix = 'fin', 'fin'
+min_percentile, max_percentile = 0.65, 1.
+save1 = './images/{}/{}-init-graph'.format(topology, topology)
+save2 = './images/{}/{}-final-graph'.format(topology, topology)
 #  init
 init = np.load('./results/{}_weights_npy/{}_weights_acc-0.1-0.125.npy'.format(topology, init_prefix), allow_pickle=True)
-db.draw_bipartite_graph(init, 
+qts1, qts2 = np.quantile(init.flatten(), min_percentile), np.quantile(init.flatten(), max_percentile)
+init[init>0.] = 0.
+init = np.absolute(init)
+init[init<qts1] = 0.
+init[init>qts2] = 0.
+db.draw_bipartite_graph(init,
                         actual_size=(init.shape[0],init.shape[1]),
                         title='Connectivity graph last layer 0.1-0.125-accuracy',
                         showfig=True,
                         savefig=save1) 
 #  fin
 fin = np.load('./results/{}_weights_npy/{}_weights_acc-0.975-1.0.npy'.format(topology, fin_prefix), allow_pickle=True)
+qts1, qts2 = np.quantile(fin.flatten(), min_percentile), np.quantile(fin.flatten(), max_percentile)
+fin[fin<qts1] = 0.
+fin[fin>qts2] = 0.
+db.draw_bipartite_graph(fin, 
+                        actual_size=(init.shape[0],10),
+                        title='Connectivity graph last layer 0.975-1.0-percentile',
+                        showfig=True,
+                        savefig=save2)
+
+# Positive weights
+init_prefix, fin_prefix = 'fin', 'fin'
+min_percentile, max_percentile = 0.65, 1.
+save1 = './images/{}/{}-init-graph'.format(topology, topology)
+save2 = './images/{}/{}-final-graph'.format(topology, topology)
+#  init
+init = np.load('./results/{}_weights_npy/{}_weights_acc-0.1-0.125.npy'.format(topology, init_prefix), allow_pickle=True)
+qts1, qts2 = np.quantile(init.flatten(), min_percentile), np.quantile(init.flatten(), max_percentile)
+init[init<0.] = 0.
+init = np.absolute(init)
+init[init<qts1] = 0.
+init[init>qts2] = 0.
+db.draw_bipartite_graph(init,
+                        actual_size=(init.shape[0],init.shape[1]),
+                        title='Connectivity graph last layer 0.1-0.125-accuracy',
+                        showfig=True,
+                        savefig=save1) 
+#  fin
+fin = np.load('./results/{}_weights_npy/{}_weights_acc-0.975-1.0.npy'.format(topology, fin_prefix), allow_pickle=True)
+qts1, qts2 = np.quantile(fin.flatten(), min_percentile), np.quantile(fin.flatten(), max_percentile)
+fin[fin<qts1] = 0.
+fin[fin>qts2] = 0.
 db.draw_bipartite_graph(fin, 
                         actual_size=(init.shape[0],10),
                         title='Connectivity graph last layer 0.975-1.0-percentile',
