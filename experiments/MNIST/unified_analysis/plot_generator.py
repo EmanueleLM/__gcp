@@ -223,9 +223,9 @@ plt.show()
 # eventually cutoff the quantiles
 # Negative weights
 init_prefix, fin_prefix = 'fin', 'fin'
-min_percentile, max_percentile = 0.95, 1.
-save1 = './images/{}/{}-init-graph-negative-weights'.format(topology, topology)
-save2 = './images/{}/{}-final-graph-negative-weights'.format(topology, topology)
+min_percentile, max_percentile = 0.90, 1.
+save1 = './images/{}/{}-init-graph-negative-weights_quantiles({}-{})'.format(topology, topology, min_percentile, max_percentile)
+save2 = './images/{}/{}-final-graph-negative-weights_quantiles({}-{})'.format(topology, topology, min_percentile, max_percentile)
 #  init
 init = np.load('./results/{}_weights_npy/{}_weights_acc-0.1-0.125.npy'.format(topology, init_prefix), allow_pickle=True)
 qts1, qts2 = np.quantile(init.flatten(), min_percentile), np.quantile(init.flatten(), max_percentile)
@@ -252,8 +252,8 @@ db.draw_bipartite_graph(fin,
                         savefig=save2)
 
 # Positive weights
-save1 = './images/{}/{}-init-graph-positive-weights'.format(topology, topology)
-save2 = './images/{}/{}-final-graph-positive-weights'.format(topology, topology)
+save1 = './images/{}/{}-init-graph-positive-weights_quantiles({}-{})'.format(topology, topology, min_percentile, max_percentile)
+save2 = './images/{}/{}-final-graph-positive-weights_quantiles({}-{})'.format(topology, topology, min_percentile, max_percentile)
 #  init
 init = np.load('./results/{}_weights_npy/{}_weights_acc-0.1-0.125.npy'.format(topology, init_prefix), allow_pickle=True)
 qts1, qts2 = np.quantile(init.flatten(), min_percentile), np.quantile(init.flatten(), max_percentile)
