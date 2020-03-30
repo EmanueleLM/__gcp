@@ -8,9 +8,9 @@ def hist_weights_mean_variance(init_weights, fin_weights, dst='', show=True):
     import numpy as np
     import matplotlib.pyplot as plt
     
-    weights_name = ['embedding_i', 'embedding_o', 'lstm', 'blstm', 'dense', 'bdense']
+    weights_name = ['conv1', 'bconv1', 'conv2', 'bconv2', 'dense1', 'bdense1', 'dense2', 'bdense2']
        
-    for i in range(len(init_weights)):
+    for i in range(8):
         plt.title('Layer: '+ weights_name[i])
         plt.hist(init_weights[i].flatten(), bins=50, color='red', alpha=0.5, label='First Generation', normed=True)
         plt.hist(fin_weights[i].flatten(), bins=50, color='blue', alpha=0.5, label='Last Generation', normed=True)
@@ -26,6 +26,4 @@ def hist_weights_mean_variance(init_weights, fin_weights, dst='', show=True):
         plt.show()
     else:
         pass
-    
-        plt.cla()
     

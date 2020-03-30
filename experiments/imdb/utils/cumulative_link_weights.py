@@ -42,7 +42,7 @@ def Qw(init_weights, fin_weights, num_params, dst):
     # reshape Qw_init and Qw_fin to the nn layers'shapes
     offset = 0
     tmp1, tmp2 = [], []
-    for i in range(len(init_weights)):
+    for i in range(8):
         tmp1.append(Qw_init[offset:offset+np.prod(weights_shapes[i])].reshape(*weights_shapes[i]))
         tmp2.append(Qw_fin[offset:offset+np.prod(weights_shapes[i])].reshape(*weights_shapes[i]))
         offset += np.prod(weights_shapes[i])

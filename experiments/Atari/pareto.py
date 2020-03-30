@@ -19,8 +19,11 @@ def pareto_frontier(src_scores,
     import matplotlib.pyplot as plt
     import numpy as np
     
-    Xs = np.genfromtxt(src_episodes_length) 
-    Ys = np.genfromtxt(src_scores)   
+    #Xs = np.genfromtxt(src_episodes_length) 
+    #Ys = np.genfromtxt(src_scores)
+    
+    Xs = [1., 2., 3.]
+    Ys = [4., 2., 4.]
     
     # remove_outliers removes pairs whose episode's length is higher than the input value
     if remove_outliers is not None:

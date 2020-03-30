@@ -21,25 +21,25 @@ It is also possible to normalize the weights before calculating the various metr
 
 def nodes_strength(i_s, f_s, dst, show=True):
     """
-        Plot nodes' strengths, i.e. s_in, s_out
+        Plot nodes' strengths, i.e. s_in + s_out (when avaialble)
     """
     
     import matplotlib.pyplot as plt
     import numpy as np
     
-    weights_name = ['embedding_i', 'embedding_o', 'lstm', 'dense', 'output']
+    weights_name = ['input', 'layer1_conv1', 'layer2_conv2', 'layer3_dense1', 'output_dense2']
        
     init_s = {}
     fin_s = {}
     init_s = {'l0': i_s.item().get('o-l0')}
     fin_s = {'l0': f_s.item().get('o-l0')}
     init_s['l1'] = i_s.item().get('i-l1') + i_s.item().get('o-l1')
-    init_s['l2'] = i_s.item().get('i-l2') + i_s.item().get('i-l3')
-    init_s['l3'] = i_s.item().get('o-l2') + i_s.item().get('o-l3')
+    init_s['l2'] = i_s.item().get('i-l2') + i_s.item().get('o-l2')
+    init_s['l3'] = i_s.item().get('i-l3') + i_s.item().get('o-l3')
     init_s['l4'] = i_s.item().get('i-l4')
     fin_s['l1'] = f_s.item().get('i-l1') + f_s.item().get('o-l1')
-    fin_s['l2'] = f_s.item().get('i-l2') + f_s.item().get('i-l3')
-    fin_s['l3'] = f_s.item().get('o-l2') + f_s.item().get('o-l3')
+    fin_s['l2'] = f_s.item().get('i-l2') + f_s.item().get('o-l2')
+    fin_s['l3'] = f_s.item().get('i-l3') + f_s.item().get('o-l3')
     fin_s['l4'] = f_s.item().get('i-l4')
     
     o = 0
@@ -81,23 +81,23 @@ def avg_strength(i_s, f_s, card_i_s, card_f_s, dst, show=True):
 
     s_k_init, s_k_fin = {}, {}
     s_k_init['l1'] = i_s.item().get('i-l1') + i_s.item().get('o-l1')  
-    s_k_init['l2'] = i_s.item().get('i-l2') + i_s.item().get('i-l3')
-    s_k_init['l3'] = i_s.item().get('o-l2') + i_s.item().get('o-l3')
+    s_k_init['l2'] = i_s.item().get('i-l2') + i_s.item().get('o-l2')
+    s_k_init['l3'] = i_s.item().get('i-l3') + i_s.item().get('o-l3')
     s_k_init['l4'] = i_s.item().get('i-l4')
     s_k_fin['l1'] = f_s.item().get('i-l1')  + i_s.item().get('o-l1')
-    s_k_fin['l2'] = f_s.item().get('i-l2')  + i_s.item().get('i-l3')
-    s_k_fin['l3'] = f_s.item().get('o-l2')  + i_s.item().get('o-l3')
+    s_k_fin['l2'] = f_s.item().get('i-l2')  + i_s.item().get('o-l2')
+    s_k_fin['l3'] = f_s.item().get('i-l3')  + i_s.item().get('o-l3')
     s_k_fin['l4'] = f_s.item().get('i-l4')
         
     card_init, card_fin = {}, {}
-    card_init['l1'] = card_i_s.item().get('i-l1').flatten() + card_i_s.item().get('o-l1').flatten()
-    card_init['l2'] = card_i_s.item().get('i-l2').flatten() + card_i_s.item().get('i-l3').flatten() +1
-    card_init['l3'] = card_i_s.item().get('o-l2').flatten() + card_i_s.item().get('o-l3').flatten()
-    card_init['l4'] = card_i_s.item().get('i-l4').flatten()
-    card_fin['l1'] = card_f_s.item().get('i-l1').flatten() + card_i_s.item().get('o-l1').flatten()
-    card_fin['l2'] = card_f_s.item().get('i-l2').flatten() + card_i_s.item().get('i-l3').flatten() +1
-    card_fin['l3'] = card_f_s.item().get('o-l2').flatten() + card_i_s.item().get('o-l3').flatten()
-    card_fin['l4'] = card_f_s.item().get('i-l4').flatten()
+    card_init['l1'] = card_i_s.item().get('i-l1').flatten() + card_i_s.item().get('o-l1').flatten() +1  # bias edge
+    card_init['l2'] = card_i_s.item().get('i-l2').flatten() + card_i_s.item().get('o-l2').flatten() +1
+    card_init['l3'] = card_i_s.item().get('i-l3').flatten() + card_i_s.item().get('o-l3').flatten()
+    card_init['l4'] = card_i_s.item().get('i-l4').flatten() +1  # bias and output edge, but bias has already taken into account
+    card_fin['l1'] = card_f_s.item().get('i-l1').flatten() + card_i_s.item().get('o-l1').flatten() +1  # bias edge
+    card_fin['l2'] = card_f_s.item().get('i-l2').flatten() + card_i_s.item().get('o-l2').flatten() +1
+    card_fin['l3'] = card_f_s.item().get('i-l3').flatten() + card_i_s.item().get('o-l3').flatten()
+    card_fin['l4'] = card_f_s.item().get('i-l4').flatten() +1  # bias and output edge, but bias has already taken into account
     
     colors = {'l1': 'red', 'l2': 'orange', 'l3': 'green', 'l4': 'blue'}
     
@@ -145,16 +145,20 @@ def Yk(i_s, f_s, card_init, i_s_squared, f_s_squared, dst, show=True):
     Yi_init['i-l1'] = i_s_squared.item().get('i-l1')
     Yi_init['i-l1'] /= (i_s.item().get('i-l1') + i_s.item().get('o-l1'))**2
     Yi_init['i-l2'] = i_s_squared.item().get('i-l2') 
-    Yi_init['i-l2'] /= (i_s.item().get('i-l2') + i_s.item().get('i-l3'))**2
-    Yi_init['i-l3'] = i_s_squared.item().get('o-l2') 
-    Yi_init['i-l3'] /= (i_s.item().get('o-l2') + i_s.item().get('o-l3'))**2
+    Yi_init['i-l2'] /= (i_s.item().get('i-l2') + i_s.item().get('o-l2'))**2
+    Yi_init['i-l3'] = i_s_squared.item().get('i-l3') 
+    Yi_init['i-l3'] /= (i_s.item().get('i-l3') + i_s.item().get('o-l3'))**2
+    Yi_init['i-l4'] = i_s_squared.item().get('i-l4')
+    Yi_init['i-l4'] /= (i_s.item().get('i-l4') +1)**2  # output strength is 1
     
     Yi_fin['i-l1'] = f_s_squared.item().get('i-l1') 
     Yi_fin['i-l1'] /= (f_s.item().get('i-l1') + f_s.item().get('o-l1'))**2
     Yi_fin['i-l2'] = f_s_squared.item().get('i-l2')
-    Yi_fin['i-l2'] /= (f_s.item().get('i-l2') + f_s.item().get('i-l3'))**2
-    Yi_fin['i-l3'] = f_s_squared.item().get('o-l2')
-    Yi_fin['i-l3'] /= (f_s.item().get('o-l2') + f_s.item().get('o-l3'))**2
+    Yi_fin['i-l2'] /= (f_s.item().get('i-l2') + f_s.item().get('o-l2'))**2
+    Yi_fin['i-l3'] = f_s_squared.item().get('i-l3') +1  # output strength is 1
+    Yi_fin['i-l3'] /= (f_s.item().get('i-l3') + f_s.item().get('o-l3'))**2
+    Yi_fin['i-l4'] = f_s_squared.item().get('i-l4')
+    Yi_fin['i-l4'] /= (f_s.item().get('i-l4') +1)**2  # output strength is 1
     
     nodes_degrees = {}
     for key in card_init.item().keys():
@@ -168,7 +172,6 @@ def Yk(i_s, f_s, card_init, i_s_squared, f_s_squared, dst, show=True):
         degrees = np.append(degrees, nodes_degrees[key].flatten())
     
     Y_k_init, Y_k_fin = {}, {}
-    print(degrees.shape, Y_i_init_flatten.shape)
     for unique_k in np.sort(np.unique(degrees)):
         where_is_k = np.argwhere(degrees==unique_k)
         Y_k_init[str(unique_k)] = np.average(Y_i_init_flatten[where_is_k])
@@ -214,9 +217,10 @@ def degrees_distribution(card, dst, show=True):
     import numpy as np
 
     card_init = {}
-    card_init['l1'] = card.item().get('i-l1').flatten() + card.item().get('o-l1').flatten()
-    card_init['l2'] = card.item().get('i-l2').flatten() + card.item().get('i-l3').flatten() +1
-    card_init['l3'] = card.item().get('o-l2').flatten() + card.item().get('o-l3').flatten()
+    card_init['l1'] = card.item().get('i-l1').flatten() + card.item().get('o-l1').flatten() +1  # bias edge
+    card_init['l2'] = card.item().get('i-l2').flatten() + card.item().get('o-l2').flatten() +1
+    card_init['l3'] = card.item().get('i-l3').flatten() + card.item().get('o-l3').flatten()
+    card_init['l4'] = card.item().get('i-l4').flatten() +1  # bias and output edge, but bias has already taken into account
     
     N = np.sum([Nk.shape[0] for Nk in card_init.values()])
     Pk, K, layer = list(), list(), list()
@@ -254,7 +258,7 @@ def cumulative_link_weights(Qw_init, Qw_fin, init_weights, fin_weights, dst, sho
     
     import matplotlib.pyplot as plt
     
-    weights_name = ['embedding_i', 'embedding_o', 'lstm', 'blstm', 'dense', 'bdense']
+    weights_name = ['conv1', 'bconv1', 'conv2', 'bconv2', 'dense1', 'bdense1', 'dense2', 'bdense2']    
         
     # 1) initial
     for i in range(8):

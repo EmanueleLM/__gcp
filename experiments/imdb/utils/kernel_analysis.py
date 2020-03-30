@@ -25,13 +25,14 @@ def kernels(init_kernel, fin_kernel, dst, mode='greyscale', show=True):
     
     # plot each kernel as greyscale image
     for i in range(init_kernel.shape[-1]):
+        max_, min_ = max(init_kernel.max(), fin_kernel.max()), min(init_kernel.min(), fin_kernel.min())  # share same min-max values for consistency
         fig = plt.figure()
         ax1 = fig.add_subplot(2,2,1)
         ax1.set_title('[KERNEL FIRST GEN.]: Number n.{}'.format(str(i)))
-        ax1.imshow(init_kernel[:,:,:channels,i].squeeze(), cmap='gray')  # first 3 channels as RGB, otherwise RGBA
+        ax1.imshow(init_kernel[:,:,:channels,i].squeeze(), cmap='gray', vmin=min_, vmax=max_)  # first 3 channels as RGB, otherwise RGBA
         ax2 = fig.add_subplot(2,2,2)
         ax2.set_title('[KERNEL FIELD LAST GEN.]: Number n.{}'.format(str(i)))
-        ax2.imshow(fin_kernel[:,:,:channels,i].squeeze(), cmap='gray')  # first 3 channels as RGB, otherwise RGBA
+        ax2.imshow(fin_kernel[:,:,:channels,i].squeeze(), cmap='gray', vmin=min_, vmax=max_)  # first 3 channels as RGB, otherwise RGBA
         plt.pause(0.05)
         fig.savefig(dst + 'kernels_conv1_' + mode +'_n{}.png'.format(str(i)))
     
