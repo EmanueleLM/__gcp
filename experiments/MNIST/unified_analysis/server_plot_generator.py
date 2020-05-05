@@ -160,7 +160,44 @@ plt.savefig('./images/{}/histogram_total_node_disparity_output-layer-accuracy({}
 plt.show()
 plt.close()
 
-# ERRORBARS:
+# Std input layer
+print("\n[logger]: Node std input layer")
+for acc, i in zip(results_folders, range(num_colors)):
+    print("\t  Processing results {}".format(acc))
+    n_files = len(glob.glob("./results/{}/{}/*.npy".format(topology, acc)))
+    total_weights, total_bias = np.array([]), np.array([])
+    for file_ in glob.glob("./results/{}/{}/*.npy".format(topology, acc)):
+        w = np.load(file_, allow_pickle=True)
+        total_weights = np.append(w[-2].flatten(), total_weights)
+        total_bias = np.append(w[-1].flatten(), total_bias)
+    s_input_layer = total_weights.reshape(n_files, 32, 10).std(axis=-1)
+    density = stats.kde.gaussian_kde(s_input_layer.flatten())
+    x = np.arange(s_input_layer.min(), s_input_layer.max(), .001)
+    plt.plot(x, density(x), alpha=.5, color=str(colors[i]))
+plt.savefig('./images/{}/histogram_total_node_std_input-layer-accuracy({}-{}-step-{}).png'.format(topology,0.1, 1.0, step))
+plt.show()
+plt.close()
+
+# Std output layer
+print("\n[logger]: Node std output layer")
+for acc, i in zip(results_folders, range(num_colors)):
+    print("\t  Processing results {}".format(acc))
+    n_files = len(glob.glob("./results/{}/{}/*.npy".format(topology, acc)))
+    total_weights, total_bias = np.array([]), np.array([])
+    for file_ in glob.glob("./results/{}/{}/*.npy".format(topology, acc)):
+        w = np.load(file_, allow_pickle=True)
+        total_weights = np.append(w[-2].flatten(), total_weights)
+        total_bias = np.append(w[-1].flatten(), total_bias)
+    s_output_layer = total_weights.reshape(n_files, 32, 10).std(axis=1) + total_bias.reshape(n_files, 10,)
+    density = stats.kde.gaussian_kde(s_output_layer.flatten())
+    x = np.arange(s_output_layer.min(), s_output_layer.max(), .001)
+    plt.plot(x, density(x), alpha=.5, color=str(colors[i]))
+plt.savefig('./images/{}/histogram_total_node_std_output-layer-accuracy({}-{}-step-{}).png'.format(topology,0.1, 1.0, step))
+plt.show()
+plt.close()
+
+
+# ERRORBARS (SCATTER):
 # weights mean and variance
 print("\n[logger]: Errorbar mean-variance")
 for a, acc, i in zip(np.arange(0.125,1.25,0.025), results_folders, range(num_colors)):
@@ -252,6 +289,40 @@ for a, acc, i in zip(np.arange(0.125,1.25,0.025), results_folders, range(num_col
 plt.savefig('./images/{}/errorbar_node-disparity-accuracy({}-{}-step-{})-output.png'.format(topology,0.1, 1.0, step))
 plt.show()
 plt.close() 
+
+# std input
+print("\n[logger]: Scatter node std input")
+for a, acc, i in zip(np.arange(0.125,1.25,0.025), results_folders, range(num_colors)):
+    print("\t  Processing results {}".format(acc))
+    n_files = len(glob.glob("./results/{}/{}/*.npy".format(topology, acc)))
+    weights, bias = np.zeros((32,10)), np.zeros(10,)
+    for file_ in glob.glob("./results/{}/{}/*.npy".format(topology, acc)):
+        w = np.load(file_, allow_pickle=True)
+        weights += w[-2]
+    weights /= n_files
+    s_input_layer = weights.std(axis=1)
+    plt.scatter(a, s_input_layer.mean(), color=str(colors[i]), alpha=.5)
+plt.savefig('./images/{}/errorbar_node-std-accuracy({}-{}-step-{})-input.png'.format(topology,0.1, 1.0, step))
+plt.show()
+plt.close()   
+
+# std output
+print("\n[logger]: Scatter node std output")
+for a, acc, i in zip(np.arange(0.125,1.25,0.025), results_folders, range(num_colors)):
+    print("\t  Processing results {}".format(acc))
+    n_files = len(glob.glob("./results/{}/{}/*.npy".format(topology, acc)))
+    weights, bias = np.zeros((32,10)), np.zeros(10,)
+    for file_ in glob.glob("./results/{}/{}/*.npy".format(topology, acc)):
+        w = np.load(file_, allow_pickle=True)
+        weights += w[-2]
+        bias += w[-1]
+    weights /= n_files
+    bias /= n_files
+    s_output_layer = weights.std(axis=0) + bias
+    plt.scatter(a, s_output_layer.mean(), color=str(colors[i]), alpha=.5)
+plt.savefig('./images/{}/errorbar_node-std-accuracy({}-{}-step-{})-output.png'.format(topology,0.1, 1.0, step))
+plt.show()
+plt.close()
     
 
 """

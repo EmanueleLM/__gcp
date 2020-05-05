@@ -15,7 +15,16 @@ from scipy import stats
 import draw_bipartite as db
 
 
-def regime(init, fin, mode, init_bias=None, fin_bias=None):        
+def regime(init, fin, mode, init_bias=None, fin_bias=None):
+    """
+    mode available: 
+        '': no transformation to the weights
+        'inh': keep only negative weights
+        'act': keep only positive
+        'abs': keep everything as absolute value
+        'tpos': shift every weight towards positives, so become all positve and keep them all
+        'tneg': shift every weight towards negative, so become all negative and keep them all
+    """      
     if mode == 'inh':
         init[init>=0.] = 0.
         fin[fin>=0.] = 0.
@@ -87,7 +96,7 @@ red = Color("green")
 colors = list(red.range_to(Color("red"),36))
 save_couples = []
 topology = 'cnn'
-mode = 'tneg'
+mode = ''
 w_t_ranger = np.arange(0.1, 0.975, 0.025)
 len_w_t_ranger = range(len(w_t_ranger))
 colors = list(red.range_to(Color("red"),len(w_t_ranger)))
@@ -231,6 +240,54 @@ plt.xlabel('Accuracy')
 plt.ylabel('Standard Deviation')
 plt.savefig('./images/{}/{}/{}-transition-std_regime-{}.png'.format(topology, mode, topology, mode))
 plt.show()
+
+# Std Input
+for acc, i in zip(w_t_ranger, len_w_t_ranger):
+    init_acc_le, fin_acc_ge = (np.around(acc,3), np.around(acc+0.025,3)), (np.around(acc+0.025,3), np.around(acc+0.05,3))
+    init_prefix, fin_prefix = 'fin', 'fin'
+    init = np.load('./results/{}_weights_npy/{}_weights_acc-{}-{}.npy'.format(topology, init_prefix, init_acc_le[0], init_acc_le[1]), allow_pickle=True)
+    fin = np.load('./results/{}_weights_npy/{}_weights_acc-{}-{}.npy'.format(topology, fin_prefix, fin_acc_ge[0], fin_acc_ge[1]), allow_pickle=True)        
+
+    init, fin = regime(init, fin, mode, init_bias=None, fin_bias=None)
+
+    s_in_i, _ = np.std(init, axis=1), np.std(init, axis=0) 
+    s_in_f, _ = np.std(fin, axis=1), np.std(fin, axis=0) 
+    s_i = s_in_i.flatten()
+    prec_i = s_in_i.flatten()
+    s_f = s_in_f.flatten()
+    plt.title('Transition Phase Std Input Layer')
+    plt.scatter(acc, s_i.flatten().mean(), color=str(colors[i]), alpha=1.0, label="Y_i first acc {0:.2f}".format(acc))
+    plt.scatter(acc+0.025, s_f.flatten().mean(), color=str(colors[i]), alpha=1.0, label="Y_i last acc {0:.2f}".format(acc))
+    #plt.legend(loc='best')
+plt.xlabel('Accuracy')
+plt.ylabel('Nodes Strength')
+plt.savefig('./images/{}/{}/{}-transition-std-input-layer_regime-{}.png'.format(topology, mode, topology, mode))
+plt.show()
+
+# Std output
+for acc, i in zip(w_t_ranger, len_w_t_ranger):
+    init_acc_le, fin_acc_ge = (np.around(acc,3), np.around(acc+0.025,3)), (np.around(acc+0.025,3), np.around(acc+0.05,3))
+    init_prefix, fin_prefix = 'fin', 'fin'
+    init = np.load('./results/{}_weights_npy/{}_weights_acc-{}-{}.npy'.format(topology, init_prefix, init_acc_le[0], init_acc_le[1]), allow_pickle=True)
+    fin = np.load('./results/{}_weights_npy/{}_weights_acc-{}-{}.npy'.format(topology, fin_prefix, fin_acc_ge[0], fin_acc_ge[1]), allow_pickle=True)        
+    init_bias = np.load('./results/{}_weights_npy/{}_bias_acc-{}-{}.npy'.format(topology, init_prefix, init_acc_le[0], init_acc_le[1]), allow_pickle=True)
+    fin_bias = np.load('./results/{}_weights_npy/{}_bias_acc-{}-{}.npy'.format(topology, fin_prefix, fin_acc_ge[0], fin_acc_ge[1]), allow_pickle=True)        
+
+    init, fin, init_bias, fin_bias = regime(init, fin, mode, init_bias=init_bias, fin_bias=fin_bias)
+    
+    _, s_out_i = np.std(init, axis=1), np.std(init, axis=0) 
+    _, s_out_f = np.std(fin, axis=1), np.std(fin, axis=0) 
+    s_i = s_out_i.flatten() + init_bias.flatten()
+    s_f = s_out_f.flatten() + fin_bias.flatten()
+    plt.title('Transition Phase Std Output Layer')
+    plt.errorbar(acc, s_i.flatten().mean(), color=str(colors[i]), alpha=1.0, label="Y_i first acc {0:.2f}".format(acc))
+    plt.errorbar(acc+0.025, s_f.flatten().mean(), color=str(colors[i]), alpha=1.0, label="Y_i last acc {0:.2f}".format(acc))
+    #plt.legend(loc='best')
+plt.xlabel('Accuracy')
+plt.ylabel('Nodes Strength')
+plt.savefig('./images/{}/{}/{}-transition-std-output-layer_regime-{}.png'.format(topology, mode, topology, mode))
+plt.show()
+
 
 ################################################
 ###### Differential Distributions #######
@@ -390,6 +447,69 @@ plt.ylabel('D(Y)')
 plt.savefig('./images/{}/{}/{}-histogram-node-disparity-out_regime-{}.png'.format(topology, mode, topology, mode))
 plt.show()
 
+# Std Input
+for acc, i in zip(arange_accuracy, range(num_colors)):
+    init_acc_le, fin_acc_ge = (np.around(acc,3), np.around(acc+0.025,3)), (np.around(acc+0.025,3), np.around(acc+0.05,3))
+    init_prefix, fin_prefix = 'fin', 'fin'
+    init = np.load('./results/{}_weights_npy/{}_weights_acc-{}-{}.npy'.format(topology, init_prefix, init_acc_le[0], init_acc_le[1]), allow_pickle=True)
+    fin = np.load('./results/{}_weights_npy/{}_weights_acc-{}-{}.npy'.format(topology, fin_prefix, fin_acc_ge[0], fin_acc_ge[1]), allow_pickle=True)        
+
+    init, fin = regime(init, fin, mode, init_bias=None, fin_bias=None)
+
+    s_in_i, _ = np.std(init, axis=1), np.std(init, axis=0) 
+    s_in_f, _ = np.std(fin, axis=1), np.std(fin, axis=0)
+    s_i = s_in_i.flatten()
+    s_f = s_in_f.flatten()
+
+    if mode == 'inh' or mode == 'act':
+        s_i = s_i[s_i>0.]
+        s_f = s_f[s_f>0.]
+    
+    plt.title('Histogram Std Input Layer Range {0:.2f}-{1:.2f} (accuracy step {2:.3f})'.format(arange_accuracy[0], 0.05+arange_accuracy[-1], step))
+    density_i = stats.kde.gaussian_kde(s_i.flatten())
+    density_f = stats.kde.gaussian_kde(s_f.flatten())
+    x_i = np.arange(s_i.min(), s_i.max(), .001)
+    x_f = np.arange(s_f.min(), s_f.max(), .001)
+    plt.plot(x_i, density_i(x_i), alpha=.5, color=str(colors_cumulative[i]))
+    plt.plot(x_f, density_f(x_f), alpha=.5, color=str(colors_cumulative[i]))
+    #plt.legend(loc='best')
+plt.xlabel('Node Strength')
+plt.ylabel('D(s)')
+plt.savefig('./images/{}/{}/{}-histogram-std-in_regime-{}.png'.format(topology, mode, topology, mode))
+plt.show()
+
+# Std Output
+for acc, i in zip(arange_accuracy, range(num_colors)):
+    init_acc_le, fin_acc_ge = (np.around(acc,3), np.around(acc+0.025,3)), (np.around(acc+0.025,3), np.around(acc+0.05,3))
+    init_prefix, fin_prefix = 'fin', 'fin'
+    init = np.load('./results/{}_weights_npy/{}_weights_acc-{}-{}.npy'.format(topology, init_prefix, init_acc_le[0], init_acc_le[1]), allow_pickle=True)
+    fin = np.load('./results/{}_weights_npy/{}_weights_acc-{}-{}.npy'.format(topology, fin_prefix, fin_acc_ge[0], fin_acc_ge[1]), allow_pickle=True)        
+    init_bias = np.load('./results/{}_weights_npy/{}_bias_acc-{}-{}.npy'.format(topology, init_prefix, init_acc_le[0], init_acc_le[1]), allow_pickle=True)
+    fin_bias = np.load('./results/{}_weights_npy/{}_bias_acc-{}-{}.npy'.format(topology, fin_prefix, fin_acc_ge[0], fin_acc_ge[1]), allow_pickle=True)        
+
+    init, fin, init_bias, fin_bias = regime(init, fin, mode, init_bias=init_bias, fin_bias=fin_bias)
+
+    _, s_out_i = np.std(init, axis=1), np.std(init, axis=0) 
+    _, s_out_f = np.std(fin, axis=1), np.std(fin, axis=0)
+    s_i = s_out_i.flatten() + init_bias.flatten()
+    s_f = s_out_f.flatten() + fin_bias.flatten()
+    
+    if mode == 'inh' or mode == 'act':
+        s_i = s_i[s_i>0.]
+        s_f = s_f[s_f>0.]
+        
+    plt.title('Histogram Std Output Layer Range {0:.2f}-{1:.2f} (accuracy step {2:.3f})'.format(arange_accuracy[0], 0.05+arange_accuracy[-1], step))
+    density_i = stats.kde.gaussian_kde(s_i.flatten())
+    density_f = stats.kde.gaussian_kde(s_f.flatten())
+    x_i = np.arange(s_i.min(), s_i.max(), .001)
+    x_f = np.arange(s_f.min(), s_f.max(), .001)
+    plt.plot(x_i, density_i(x_i), alpha=.5, color=str(colors_cumulative[i]))
+    plt.plot(x_f, density_f(x_f), alpha=.5, color=str(colors_cumulative[i]))
+    #plt.legend(loc='best')
+plt.xlabel('Node Strength')
+plt.ylabel('D(s)')
+plt.savefig('./images/{}/{}/{}-histogram-std-out_regime-{}.png'.format(topology, mode, topology, mode))
+plt.show()
 
 ################################################
 ###### Cumulative Distributions #######
