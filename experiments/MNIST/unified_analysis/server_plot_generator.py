@@ -63,32 +63,37 @@ bins = 100
 num_colors = len(results_folders)
 red = Color("green")
 colors = list(red.range_to(Color("red"),num_colors))
+files_pattern = "./results/@topology@/@accuracy@/*.npy"  # wildcards for topology and accuracy
+files_pattern = files_pattern.replace('@topology@', topology)
+saved_images_path = "./images/{}/".format(topology)
 
 # HISTOGRAMS
 # Link weights histogram
 print("\n[logger]: Link weights histogram")
 for acc, i in zip(results_folders, range(num_colors)):
-    print("[logger]: Processing results {}".format(acc))
-    n_files = len(glob.glob("./results/{}/{}/*.npy".format(topology, acc)))
+    print("[logger]: Processing results {}".format(acc))    
+    files_ = files_pattern.replace('@accuracy@', acc)    
+    n_files = len(glob.glob(files_))    
     total_weights, total_bias = np.array([]), np.array([])
-    for file_ in glob.glob("./results/{}/{}/*.npy".format(topology, acc)):
+    for file_ in glob.glob(files_):
         w = np.load(file_, allow_pickle=True)
         total_weights = np.append(w[-2].flatten(), total_weights)
         total_bias = np.append(w[-1].flatten(), total_bias) 
     density = stats.kde.gaussian_kde(np.concatenate((total_weights.flatten(), total_bias.flatten())))
     x = np.arange(-1., 1., .001)
     plt.plot(x, density(x), alpha=.5, color=str(colors[i]))
-plt.savefig('./images/{}/histogram_total_weights-accuracy({}-{}-step-{}).png'.format(topology,0.1, 1.0, step))
+plt.savefig('{}histogram_total_weights-accuracy({}-{}-step-{}).png'.format(saved_images_path,0.1, 1.0, step))
 plt.show()
 plt.close() 
 
 # Node strenght input layer
 print("\n[logger]: Node strenght input layer")
 for acc, i in zip(results_folders, range(num_colors)):
-    print("\t  Processing results {}".format(acc))
-    n_files = len(glob.glob("./results/{}/{}/*.npy".format(topology, acc)))
+    print("[logger]: Processing results {}".format(acc))    
+    files_ = files_pattern.replace('@accuracy@', acc)    
+    n_files = len(glob.glob(files_))    
     total_weights, total_bias = np.array([]), np.array([])
-    for file_ in glob.glob("./results/{}/{}/*.npy".format(topology, acc)):
+    for file_ in glob.glob(files_):
         w = np.load(file_, allow_pickle=True)
         total_weights = np.append(w[-2].flatten(), total_weights)
         total_bias = np.append(w[-1].flatten(), total_bias)
@@ -96,17 +101,18 @@ for acc, i in zip(results_folders, range(num_colors)):
     density = stats.kde.gaussian_kde(s_input_layer.flatten())
     x = np.arange(s_input_layer.min(), s_input_layer.max(), .001)
     plt.plot(x, density(x), alpha=.5, color=str(colors[i]))
-plt.savefig('./images/{}/histogram_total_node_strenght_input-layer-accuracy({}-{}-step-{}).png'.format(topology,0.1, 1.0, step))
+plt.savefig('{}histogram_total_node_strenght_input-layer-accuracy({}-{}-step-{}).png'.format(saved_images_path,0.1, 1.0, step))
 plt.show()
 plt.close()
 
 # Node strenght output layer
 print("\n[logger]: Node strenght output layer")
 for acc, i in zip(results_folders, range(num_colors)):
-    print("\t  Processing results {}".format(acc))
-    n_files = len(glob.glob("./results/{}/{}/*.npy".format(topology, acc)))
+    print("[logger]: Processing results {}".format(acc))    
+    files_ = files_pattern.replace('@accuracy@', acc)    
+    n_files = len(glob.glob(files_))    
     total_weights, total_bias = np.array([]), np.array([])
-    for file_ in glob.glob("./results/{}/{}/*.npy".format(topology, acc)):
+    for file_ in glob.glob(files_):
         w = np.load(file_, allow_pickle=True)
         total_weights = np.append(w[-2].flatten(), total_weights)
         total_bias = np.append(w[-1].flatten(), total_bias)
@@ -114,17 +120,18 @@ for acc, i in zip(results_folders, range(num_colors)):
     density = stats.kde.gaussian_kde(s_output_layer.flatten())
     x = np.arange(s_output_layer.min(), s_output_layer.max(), .001)
     plt.plot(x, density(x), alpha=.5, color=str(colors[i]))
-plt.savefig('./images/{}/histogram_total_node_strenght_output-layer-accuracy({}-{}-step-{}).png'.format(topology,0.1, 1.0, step))
+plt.savefig('{}histogram_total_node_strenght_output-layer-accuracy({}-{}-step-{}).png'.format(saved_images_path,0.1, 1.0, step))
 plt.show()
 plt.close()
 
 # Node disparity input layer
 print("\n[logger]: Node disparity input layer")
 for acc, i in zip(results_folders, range(num_colors)):
-    print("\t  Processing results {}".format(acc))
-    n_files = len(glob.glob("./results/{}/{}/*.npy".format(topology, acc)))
+    print("[logger]: Processing results {}".format(acc))    
+    files_ = files_pattern.replace('@accuracy@', acc)    
+    n_files = len(glob.glob(files_))    
     total_weights, total_bias = np.array([]), np.array([])
-    for file_ in glob.glob("./results/{}/{}/*.npy".format(topology, acc)):
+    for file_ in glob.glob(files_):
         w = np.load(file_, allow_pickle=True)
         min_w, min_b = np.min(w[-2]), np.min(w[-1])
         min_ = np.abs(min(min_b, min_w))
@@ -135,17 +142,18 @@ for acc, i in zip(results_folders, range(num_colors)):
     density = stats.kde.gaussian_kde(Y.flatten())
     x = np.arange(Y.min(), Y.max(), .001)
     plt.plot(x, density(x), alpha=.5, color=str(colors[i]))
-plt.savefig('./images/{}/histogram_total_node_disparity_input-layer-accuracy({}-{}-step-{}).png'.format(topology,0.1, 1.0, step))
+plt.savefig('{}histogram_total_node_disparity_input-layer-accuracy({}-{}-step-{}).png'.format(saved_images_path,0.1, 1.0, step))
 plt.show()
 plt.close()
 
 # Node disparity output layer
 print("\n[logger]: Node disparity output layer")
 for acc, i in zip(results_folders, range(num_colors)):
-    print("\t  Processing results {}".format(acc))
-    n_files = len(glob.glob("./results/{}/{}/*.npy".format(topology, acc)))
+    print("[logger]: Processing results {}".format(acc))    
+    files_ = files_pattern.replace('@accuracy@', acc)    
+    n_files = len(glob.glob(files_))    
     total_weights, total_bias = np.array([]), np.array([])
-    for file_ in glob.glob("./results/{}/{}/*.npy".format(topology, acc)):
+    for file_ in glob.glob(files_):
         w = np.load(file_, allow_pickle=True)
         min_w, min_b = np.min(w[-2]), np.min(w[-1])
         min_ = np.abs(min(min_b, min_w))
@@ -156,17 +164,18 @@ for acc, i in zip(results_folders, range(num_colors)):
     density = stats.kde.gaussian_kde(Y.flatten())
     x = np.arange(Y.min(), Y.max(), .0001)
     plt.plot(x, density(x), alpha=.5, color=str(colors[i]))
-plt.savefig('./images/{}/histogram_total_node_disparity_output-layer-accuracy({}-{}-step-{}).png'.format(topology,0.1, 1.0, step))
+plt.savefig('{}histogram_total_node_disparity_output-layer-accuracy({}-{}-step-{}).png'.format(saved_images_path,0.1, 1.0, step))
 plt.show()
 plt.close()
 
 # Std input layer
 print("\n[logger]: Node std input layer")
 for acc, i in zip(results_folders, range(num_colors)):
-    print("\t  Processing results {}".format(acc))
-    n_files = len(glob.glob("./results/{}/{}/*.npy".format(topology, acc)))
+    print("[logger]: Processing results {}".format(acc))    
+    files_ = files_pattern.replace('@accuracy@', acc)    
+    n_files = len(glob.glob(files_))    
     total_weights, total_bias = np.array([]), np.array([])
-    for file_ in glob.glob("./results/{}/{}/*.npy".format(topology, acc)):
+    for file_ in glob.glob(files_):
         w = np.load(file_, allow_pickle=True)
         total_weights = np.append(w[-2].flatten(), total_weights)
         total_bias = np.append(w[-1].flatten(), total_bias)
@@ -174,17 +183,18 @@ for acc, i in zip(results_folders, range(num_colors)):
     density = stats.kde.gaussian_kde(s_input_layer.flatten())
     x = np.arange(s_input_layer.min(), s_input_layer.max(), .001)
     plt.plot(x, density(x), alpha=.5, color=str(colors[i]))
-plt.savefig('./images/{}/histogram_total_node_std_input-layer-accuracy({}-{}-step-{}).png'.format(topology,0.1, 1.0, step))
+plt.savefig('{}histogram_total_node_std_input-layer-accuracy({}-{}-step-{}).png'.format(saved_images_path,0.1, 1.0, step))
 plt.show()
 plt.close()
 
 # Std output layer
 print("\n[logger]: Node std output layer")
 for acc, i in zip(results_folders, range(num_colors)):
-    print("\t  Processing results {}".format(acc))
-    n_files = len(glob.glob("./results/{}/{}/*.npy".format(topology, acc)))
+    print("[logger]: Processing results {}".format(acc))    
+    files_ = files_pattern.replace('@accuracy@', acc)    
+    n_files = len(glob.glob(files_))    
     total_weights, total_bias = np.array([]), np.array([])
-    for file_ in glob.glob("./results/{}/{}/*.npy".format(topology, acc)):
+    for file_ in glob.glob(files_):
         w = np.load(file_, allow_pickle=True)
         total_weights = np.append(w[-2].flatten(), total_weights)
         total_bias = np.append(w[-1].flatten(), total_bias)
@@ -192,7 +202,7 @@ for acc, i in zip(results_folders, range(num_colors)):
     density = stats.kde.gaussian_kde(s_output_layer.flatten())
     x = np.arange(s_output_layer.min(), s_output_layer.max(), .001)
     plt.plot(x, density(x), alpha=.5, color=str(colors[i]))
-plt.savefig('./images/{}/histogram_total_node_std_output-layer-accuracy({}-{}-step-{}).png'.format(topology,0.1, 1.0, step))
+plt.savefig('{}histogram_total_node_std_output-layer-accuracy({}-{}-step-{}).png'.format(saved_images_path,0.1, 1.0, step))
 plt.show()
 plt.close()
 
@@ -202,9 +212,10 @@ plt.close()
 print("\n[logger]: Errorbar mean-variance")
 for a, acc, i in zip(np.arange(0.125,1.25,0.025), results_folders, range(num_colors)):
     print("\t  Processing results {}".format(acc))
-    n_files = len(glob.glob("./results/{}/{}/*.npy".format(topology, acc)))
+    files_ = files_pattern.replace('@accuracy@', acc)    
+    n_files = len(glob.glob(files_))    
     weights, bias = np.zeros((32,10)), np.zeros(10,)
-    for file_ in glob.glob("./results/{}/{}/*.npy".format(topology, acc)):
+    for file_ in glob.glob(files_):
         w = np.load(file_, allow_pickle=True)
         weights += w[-2]
         bias += w[-1]
@@ -212,7 +223,7 @@ for a, acc, i in zip(np.arange(0.125,1.25,0.025), results_folders, range(num_col
     bias /= n_files  
     wb = np.concatenate((weights.flatten(), bias.flatten()))
     plt.errorbar(a, wb.mean(), yerr=wb.std(), fmt='--o', color=str(colors[i]), alpha=1.)
-plt.savefig('./images/{}/errorbar_total_weights-accuracy({}-{}-step-{}).png'.format(topology,0.1, 1.0, step))
+plt.savefig('{}errorbar_total_weights-accuracy({}-{}-step-{}).png'.format(saved_images_path,0.1, 1.0, step))
 plt.show()
 plt.close()    
 
@@ -220,15 +231,16 @@ plt.close()
 print("\n[logger]: Errorbar node strength input")
 for a, acc, i in zip(np.arange(0.125,1.25,0.025), results_folders, range(num_colors)):
     print("\t  Processing results {}".format(acc))
-    n_files = len(glob.glob("./results/{}/{}/*.npy".format(topology, acc)))
+    files_ = files_pattern.replace('@accuracy@', acc)    
+    n_files = len(glob.glob(files_))    
     weights, bias = np.zeros((32,10)), np.zeros(10,)
-    for file_ in glob.glob("./results/{}/{}/*.npy".format(topology, acc)):
+    for file_ in glob.glob(files_):
         w = np.load(file_, allow_pickle=True)
         weights += w[-2]
     weights /= n_files
     s_input_layer = weights.sum(axis=1)
     plt.errorbar(a, s_input_layer.mean(), yerr=s_input_layer.std(), fmt='--o', color=str(colors[i]), alpha=.5)
-plt.savefig('./images/{}/errorbar_node-strenght-accuracy({}-{}-step-{})-input.png'.format(topology,0.1, 1.0, step))
+plt.savefig('{}errorbar_node-strenght-accuracy({}-{}-step-{})-input.png'.format(saved_images_path,0.1, 1.0, step))
 plt.show()
 plt.close()   
 
@@ -236,9 +248,10 @@ plt.close()
 print("\n[logger]: Errorbar node strength output")
 for a, acc, i in zip(np.arange(0.125,1.25,0.025), results_folders, range(num_colors)):
     print("\t  Processing results {}".format(acc))
-    n_files = len(glob.glob("./results/{}/{}/*.npy".format(topology, acc)))
+    files_ = files_pattern.replace('@accuracy@', acc)    
+    n_files = len(glob.glob(files_))    
     weights, bias = np.zeros((32,10)), np.zeros(10,)
-    for file_ in glob.glob("./results/{}/{}/*.npy".format(topology, acc)):
+    for file_ in glob.glob(files_):
         w = np.load(file_, allow_pickle=True)
         weights += w[-2]
         bias += w[-1]
@@ -246,7 +259,7 @@ for a, acc, i in zip(np.arange(0.125,1.25,0.025), results_folders, range(num_col
     bias /= n_files
     s_output_layer = weights.sum(axis=0) + bias
     plt.errorbar(a, s_output_layer.mean(), yerr=s_input_layer.std(), fmt='--o', color=str(colors[i]), alpha=.5)
-plt.savefig('./images/{}/errorbar_node-strenght-accuracy({}-{}-step-{})-output.png'.format(topology,0.1, 1.0, step))
+plt.savefig('{}errorbar_node-strenght-accuracy({}-{}-step-{})-output.png'.format(saved_images_path,0.1, 1.0, step))
 plt.show()
 plt.close()   
 
@@ -254,9 +267,10 @@ plt.close()
 print("\n[logger]: Errorbar node disparity input")
 for a, acc, i in zip(np.arange(0.125,1.25,0.025), results_folders, range(num_colors)):
     print("\t  Processing results {}".format(acc))
-    n_files = len(glob.glob("./results/{}/{}/*.npy".format(topology, acc)))
+    files_ = files_pattern.replace('@accuracy@', acc)    
+    n_files = len(glob.glob(files_))    
     weights, bias = np.zeros((32,10)), np.zeros(10,)
-    for file_ in glob.glob("./results/{}/{}/*.npy".format(topology, acc)):
+    for file_ in glob.glob(files_):
         w = np.load(file_, allow_pickle=True)
         weights += w[-2]
     weights /= n_files
@@ -264,7 +278,7 @@ for a, acc, i in zip(np.arange(0.125,1.25,0.025), results_folders, range(num_col
     s_input_layer = weights.sum(axis=1)
     Y = np.sum(weights**2, axis=1)/s_input_layer**2
     plt.errorbar(a, Y.mean(), yerr=Y.std(), fmt='--o', color=str(colors[i]), alpha=.5)
-plt.savefig('./images/{}/errorbar_node-disparity-accuracy({}-{}-step-{})-input.png'.format(topology,0.1, 1.0, step))
+plt.savefig('{}errorbar_node-disparity-accuracy({}-{}-step-{})-input.png'.format(saved_images_path,0.1, 1.0, step))
 plt.show()
 plt.close()  
 
@@ -272,9 +286,10 @@ plt.close()
 print("\n[logger]: Errorbar node disparity output")
 for a, acc, i in zip(np.arange(0.125,1.25,0.025), results_folders, range(num_colors)):
     print("\t  Processing results {}".format(acc))
-    n_files = len(glob.glob("./results/{}/{}/*.npy".format(topology, acc)))
+    files_ = files_pattern.replace('@accuracy@', acc)    
+    n_files = len(glob.glob(files_))    
     weights, bias = np.zeros((32,10)), np.zeros(10,)
-    for file_ in glob.glob("./results/{}/{}/*.npy".format(topology, acc)):
+    for file_ in glob.glob(files_):
         w = np.load(file_, allow_pickle=True)
         weights += w[-2]
         bias += w[-1]
@@ -286,7 +301,7 @@ for a, acc, i in zip(np.arange(0.125,1.25,0.025), results_folders, range(num_col
     s_output_layer = weights.sum(axis=0) + bias
     Y = (np.sum(weights**2, axis=0)+bias**2)/s_output_layer**2
     plt.errorbar(a, Y.mean(), yerr=Y.std(), fmt='--o', color=str(colors[i]), alpha=.5)
-plt.savefig('./images/{}/errorbar_node-disparity-accuracy({}-{}-step-{})-output.png'.format(topology,0.1, 1.0, step))
+plt.savefig('{}errorbar_node-disparity-accuracy({}-{}-step-{})-output.png'.format(saved_images_path,0.1, 1.0, step))
 plt.show()
 plt.close() 
 
@@ -294,15 +309,16 @@ plt.close()
 print("\n[logger]: Scatter node std input")
 for a, acc, i in zip(np.arange(0.125,1.25,0.025), results_folders, range(num_colors)):
     print("\t  Processing results {}".format(acc))
-    n_files = len(glob.glob("./results/{}/{}/*.npy".format(topology, acc)))
+    files_ = files_pattern.replace('@accuracy@', acc)    
+    n_files = len(glob.glob(files_))    
     weights, bias = np.zeros((32,10)), np.zeros(10,)
-    for file_ in glob.glob("./results/{}/{}/*.npy".format(topology, acc)):
+    for file_ in glob.glob(files_):
         w = np.load(file_, allow_pickle=True)
         weights += w[-2]
     weights /= n_files
     s_input_layer = weights.std(axis=1)
     plt.scatter(a, s_input_layer.mean(), color=str(colors[i]), alpha=.5)
-plt.savefig('./images/{}/errorbar_node-std-accuracy({}-{}-step-{})-input.png'.format(topology,0.1, 1.0, step))
+plt.savefig('{}errorbar_node-std-accuracy({}-{}-step-{})-input.png'.format(saved_images_path,0.1, 1.0, step))
 plt.show()
 plt.close()   
 
@@ -310,9 +326,10 @@ plt.close()
 print("\n[logger]: Scatter node std output")
 for a, acc, i in zip(np.arange(0.125,1.25,0.025), results_folders, range(num_colors)):
     print("\t  Processing results {}".format(acc))
-    n_files = len(glob.glob("./results/{}/{}/*.npy".format(topology, acc)))
+    files_ = files_pattern.replace('@accuracy@', acc)    
+    n_files = len(glob.glob(files_))    
     weights, bias = np.zeros((32,10)), np.zeros(10,)
-    for file_ in glob.glob("./results/{}/{}/*.npy".format(topology, acc)):
+    for file_ in glob.glob(files_):
         w = np.load(file_, allow_pickle=True)
         weights += w[-2]
         bias += w[-1]
@@ -320,7 +337,7 @@ for a, acc, i in zip(np.arange(0.125,1.25,0.025), results_folders, range(num_col
     bias /= n_files
     s_output_layer = weights.std(axis=0) + bias
     plt.scatter(a, s_output_layer.mean(), color=str(colors[i]), alpha=.5)
-plt.savefig('./images/{}/errorbar_node-std-accuracy({}-{}-step-{})-output.png'.format(topology,0.1, 1.0, step))
+plt.savefig('{}errorbar_node-std-accuracy({}-{}-step-{})-output.png'.format(saved_images_path,0.1, 1.0, step))
 plt.show()
 plt.close()
     
