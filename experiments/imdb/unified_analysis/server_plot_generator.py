@@ -78,7 +78,7 @@ for acc, i in zip(results_folders, range(num_colors)):
         w = np.load(file_, allow_pickle=True)
         total_weights = np.append(w[-2].flatten(), total_weights)
         total_bias = np.append(w[-1].flatten(), total_bias)
-    s_input_layer = total_weights.reshape(n_files, 32, 10).sum(axis=-1)
+    s_input_layer = total_weights.reshape(n_files, 32, 2).sum(axis=-1)
     density = stats.kde.gaussian_kde(s_input_layer.flatten())
     x = np.arange(s_input_layer.min(), s_input_layer.max(), .001)
     plt.plot(x, density(x), alpha=.5, color=str(colors[i]))
@@ -97,7 +97,7 @@ for acc, i in zip(results_folders, range(num_colors)):
         w = np.load(file_, allow_pickle=True)
         total_weights = np.append(w[-2].flatten(), total_weights)
         total_bias = np.append(w[-1].flatten(), total_bias)
-    s_output_layer = total_weights.reshape(n_files, 32, 10).sum(axis=1) + total_bias.reshape(n_files, 10,)
+    s_output_layer = total_weights.reshape(n_files, 32, 2).sum(axis=1) + total_bias.reshape(n_files, 2,)
     density = stats.kde.gaussian_kde(s_output_layer.flatten())
     x = np.arange(s_output_layer.min(), s_output_layer.max(), .001)
     plt.plot(x, density(x), alpha=.5, color=str(colors[i]))
@@ -118,8 +118,8 @@ for acc, i in zip(results_folders, range(num_colors)):
         min_ = np.abs(min(min_b, min_w))
         total_weights = np.append(w[-2]+min_, total_weights)
         total_bias = np.append(w[-1]+min_, total_bias)
-    s_input_layer = total_weights.reshape(n_files, 32, 10).sum(axis=-1)
-    Y = np.sum(total_weights.reshape(n_files, 32, 10)**2, axis=-1)/s_input_layer**2
+    s_input_layer = total_weights.reshape(n_files, 32, 2).sum(axis=-1)
+    Y = np.sum(total_weights.reshape(n_files, 32, 2)**2, axis=-1)/s_input_layer**2
     density = stats.kde.gaussian_kde(Y.flatten())
     x = np.arange(Y.min(), Y.max(), .001)
     plt.plot(x, density(x), alpha=.5, color=str(colors[i]))
@@ -140,8 +140,8 @@ for acc, i in zip(results_folders, range(num_colors)):
         min_ = np.abs(min(min_b, min_w))
         total_weights = np.append(w[-2]+min_, total_weights)
         total_bias = np.append(w[-1]+min_, total_bias)
-    s_output_layer = total_weights.reshape(n_files, 32, 10).sum(axis=1) + total_bias.reshape(n_files, 10,)
-    Y = (np.sum(total_weights.reshape(n_files, 32, 10)**2, axis=1)+total_bias.reshape(n_files, 10,)**2)/s_output_layer**2
+    s_output_layer = total_weights.reshape(n_files, 32, 2).sum(axis=1) + total_bias.reshape(n_files, 2,)
+    Y = (np.sum(total_weights.reshape(n_files, 32, 2)**2, axis=1)+total_bias.reshape(n_files, 2,)**2)/s_output_layer**2
     density = stats.kde.gaussian_kde(Y.flatten())
     x = np.arange(Y.min(), Y.max(), .0001)
     plt.plot(x, density(x), alpha=.5, color=str(colors[i]))
@@ -160,7 +160,7 @@ for acc, i in zip(results_folders, range(num_colors)):
         w = np.load(file_, allow_pickle=True)
         total_weights = np.append(w[-2].flatten(), total_weights)
         total_bias = np.append(w[-1].flatten(), total_bias)
-    s_input_layer = total_weights.reshape(n_files, 32, 10).std(axis=-1)
+    s_input_layer = total_weights.reshape(n_files, 32, 2).std(axis=-1)
     density = stats.kde.gaussian_kde(s_input_layer.flatten())
     x = np.arange(s_input_layer.min(), s_input_layer.max(), .001)
     plt.plot(x, density(x), alpha=.5, color=str(colors[i]))
@@ -179,7 +179,7 @@ for acc, i in zip(results_folders, range(num_colors)):
         w = np.load(file_, allow_pickle=True)
         total_weights = np.append(w[-2].flatten(), total_weights)
         total_bias = np.append(w[-1].flatten(), total_bias)
-    s_output_layer = total_weights.reshape(n_files, 32, 10).std(axis=1) + total_bias.reshape(n_files, 10,)
+    s_output_layer = total_weights.reshape(n_files, 32, 2).std(axis=1) + total_bias.reshape(n_files, 2,)
     density = stats.kde.gaussian_kde(s_output_layer.flatten())
     x = np.arange(s_output_layer.min(), s_output_layer.max(), .001)
     plt.plot(x, density(x), alpha=.5, color=str(colors[i]))
@@ -195,7 +195,7 @@ for a, acc, i in zip(np.arange(0.125,1.25,0.025), results_folders, range(num_col
     print("\t  Processing results {}".format(acc))
     files_ = files_pattern.replace('@accuracy@', acc)    
     n_files = len(glob.glob(files_))    
-    weights, bias = np.zeros((32,10)), np.zeros(10,)
+    weights, bias = np.zeros((32,2)), np.zeros(2,)
     for file_ in glob.glob(files_):
         w = np.load(file_, allow_pickle=True)
         weights += w[-2]
@@ -214,7 +214,7 @@ for a, acc, i in zip(np.arange(0.125,1.25,0.025), results_folders, range(num_col
     print("\t  Processing results {}".format(acc))
     files_ = files_pattern.replace('@accuracy@', acc)    
     n_files = len(glob.glob(files_))    
-    weights, bias = np.zeros((32,10)), np.zeros(10,)
+    weights, bias = np.zeros((32,2)), np.zeros(2,)
     for file_ in glob.glob(files_):
         w = np.load(file_, allow_pickle=True)
         weights += w[-2]
@@ -231,7 +231,7 @@ for a, acc, i in zip(np.arange(0.125,1.25,0.025), results_folders, range(num_col
     print("\t  Processing results {}".format(acc))
     files_ = files_pattern.replace('@accuracy@', acc)    
     n_files = len(glob.glob(files_))    
-    weights, bias = np.zeros((32,10)), np.zeros(10,)
+    weights, bias = np.zeros((32,2)), np.zeros(2,)
     for file_ in glob.glob(files_):
         w = np.load(file_, allow_pickle=True)
         weights += w[-2]
@@ -250,7 +250,7 @@ for a, acc, i in zip(np.arange(0.125,1.25,0.025), results_folders, range(num_col
     print("\t  Processing results {}".format(acc))
     files_ = files_pattern.replace('@accuracy@', acc)    
     n_files = len(glob.glob(files_))    
-    weights, bias = np.zeros((32,10)), np.zeros(10,)
+    weights, bias = np.zeros((32,2)), np.zeros(2,)
     for file_ in glob.glob(files_):
         w = np.load(file_, allow_pickle=True)
         weights += w[-2]
@@ -269,7 +269,7 @@ for a, acc, i in zip(np.arange(0.125,1.25,0.025), results_folders, range(num_col
     print("\t  Processing results {}".format(acc))
     files_ = files_pattern.replace('@accuracy@', acc)    
     n_files = len(glob.glob(files_))    
-    weights, bias = np.zeros((32,10)), np.zeros(10,)
+    weights, bias = np.zeros((32,2)), np.zeros(2,)
     for file_ in glob.glob(files_):
         w = np.load(file_, allow_pickle=True)
         weights += w[-2]
@@ -292,7 +292,7 @@ for a, acc, i in zip(np.arange(0.125,1.25,0.025), results_folders, range(num_col
     print("\t  Processing results {}".format(acc))
     files_ = files_pattern.replace('@accuracy@', acc)    
     n_files = len(glob.glob(files_))    
-    weights, bias = np.zeros((32,10)), np.zeros(10,)
+    weights, bias = np.zeros((32,2)), np.zeros(2,)
     for file_ in glob.glob(files_):
         w = np.load(file_, allow_pickle=True)
         weights += w[-2]
@@ -309,7 +309,7 @@ for a, acc, i in zip(np.arange(0.125,1.25,0.025), results_folders, range(num_col
     print("\t  Processing results {}".format(acc))
     files_ = files_pattern.replace('@accuracy@', acc)    
     n_files = len(glob.glob(files_))    
-    weights, bias = np.zeros((32,10)), np.zeros(10,)
+    weights, bias = np.zeros((32,2)), np.zeros(2,)
     for file_ in glob.glob(files_):
         w = np.load(file_, allow_pickle=True)
         weights += w[-2]
