@@ -52,10 +52,8 @@ results_folders = ["0.1-0.125",
                     "0.85-0.875",
                     "0.875-0.9",
                     "0.9-0.925",
-                    "0.925-0.95",
-                    "0.95-0.975",
-                    "0.975-1.0"
-                    ]
+                    "0.925-0.95"
+                    ]  # 0.95-0.975 and 0.975-1.0 have been removed, add it again
 
 topology = 'fc'  
 step = 0.025
@@ -63,7 +61,7 @@ bins = 100
 num_colors = len(results_folders)
 red = Color("green")
 colors = list(red.range_to(Color("red"),num_colors))
-files_pattern = "./results/@topology@/@accuracy@/*.npy"  # wildcards for topology and accuracy
+files_pattern = "./results/@topology@/@accuracy@/*uniform-1.0*.npy"  # wildcards for topology and accuracy
 files_pattern = files_pattern.replace('@topology@', topology)
 saved_images_path = "./images/{}/".format(topology)
 
@@ -73,7 +71,8 @@ print("\n[logger]: Link weights histogram")
 for acc, i in zip(results_folders, range(num_colors)):
     print("[logger]: Processing results {}".format(acc))    
     files_ = files_pattern.replace('@accuracy@', acc)    
-    n_files = len(glob.glob(files_))    
+    n_files = len(glob.glob(files_))
+    print("[logger]: {} files in folder {}".format(n_files, files_))
     total_weights, total_bias = np.array([]), np.array([])
     for file_ in glob.glob(files_):
         w = np.load(file_, allow_pickle=True)
