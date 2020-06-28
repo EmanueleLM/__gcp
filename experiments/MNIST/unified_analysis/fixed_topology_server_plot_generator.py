@@ -39,19 +39,7 @@ results_folders = ["0.1-0.125",
                     "0.55-0.575",
                     "0.575-0.6",
                     "0.6-0.625",
-                    "0.625-0.65",
-                    "0.65-0.675",
-                    "0.675-0.7",
-                    "0.7-0.725",
-                    "0.725-0.75",
-                    "0.75-0.775",
-                    "0.775-0.8",
-                    "0.8-0.825",
-                    "0.825-0.85",
-                    "0.85-0.875",
-                    "0.875-0.9",
-                    "0.9-0.925",
-                    "0.925-0.95"
+                    "0.625-0.65"
                     ]  # 0.95-0.975 and 0.975-1.0 have been removed, add it again
 
 topology = 'fc'  
@@ -60,10 +48,10 @@ bins = 100
 num_colors = len(results_folders)
 red = Color("green")
 colors = list(red.range_to(Color("red"),num_colors))
-files_pattern = "./results/@topology@/@accuracy@/*uniform-1.0*.npy"  # wildcards for topology and accuracy
+files_pattern = "./results/@topology@/@accuracy@/*fixed_topology-64-32-10_random-normal-0-10.00*.npy"  # wildcards for topology and accuracy
 files_pattern = files_pattern.replace('@topology@', topology)
 saved_images_path = "./images/{}/".format(topology)
-neurons_per_layer = [28*28, 64, 32, 10]
+
 
 ###############################################################################
 # HISTOGRAMS
@@ -139,7 +127,7 @@ for acc, i in zip(results_folders, range(num_colors)):
     for file_ in glob.glob(files_):
         w = np.load(file_, allow_pickle=True)
         total_weights = np.append(w[0].flatten(), total_weights)
-    s_input_layer = 1 + total_weights.reshape(n_files, neurons_per_layer[0], neurons_per_layer[1]).sum(axis=-1)  # +1 for the implicit weights in each input
+    s_input_layer = 1 + total_weights.reshape(n_files, 28*28, 64).sum(axis=-1)  # +1 for the implicit weights in each input
     density = stats.kde.gaussian_kde(s_input_layer.flatten())
     x = np.arange(s_input_layer.min(), s_input_layer.max(), .001)
     plt.plot(x, density(x), alpha=.5, color=str(colors[i]))
@@ -160,8 +148,8 @@ for acc, i in zip(results_folders, range(num_colors)):
         total_weights = np.append(w[0].flatten(), total_weights)  # 28*28,64
         total_bias = np.append(w[1].flatten(), total_bias)  # 64
         total_weights_o = np.append(w[2].flatten(), total_weights_o)  # 64,32
-    s_output_layer = total_weights.reshape(n_files, neurons_per_layer[0], neurons_per_layer[1]).sum(axis=1) + total_bias.reshape(n_files, neurons_per_layer[1],)
-    s_output_layer += total_weights_o.reshape(n_files, neurons_per_layer[1], neurons_per_layer[2]).sum(axis=-1)
+    s_output_layer = total_weights.reshape(n_files, 28*28, 64).sum(axis=1) + total_bias.reshape(n_files, 64,)
+    s_output_layer += total_weights_o.reshape(n_files, 64, 32).sum(axis=-1)
     density = stats.kde.gaussian_kde(s_output_layer.flatten())
     x = np.arange(s_output_layer.min(), s_output_layer.max(), .001)
     plt.plot(x, density(x), alpha=.5, color=str(colors[i]))
@@ -182,8 +170,8 @@ for acc, i in zip(results_folders, range(num_colors)):
         total_weights = np.append(w[2].flatten(), total_weights)  # 64,32
         total_bias = np.append(w[3].flatten(), total_bias)  # 32
         total_weights_o = np.append(w[4].flatten(), total_weights_o)  # 32,10
-    s_output_layer = total_weights.reshape(n_files, neurons_per_layer[1], neurons_per_layer[2]).sum(axis=1) + total_bias.reshape(n_files, neurons_per_layer[2],)
-    s_output_layer += total_weights_o.reshape(n_files, neurons_per_layer[2], neurons_per_layer[3]).sum(axis=-1) 
+    s_output_layer = total_weights.reshape(n_files, 64, 32).sum(axis=1) + total_bias.reshape(n_files, 32,)
+    s_output_layer += total_weights_o.reshape(n_files, 32, 10).sum(axis=-1) 
     density = stats.kde.gaussian_kde(s_output_layer.flatten())
     x = np.arange(s_output_layer.min(), s_output_layer.max(), .001)
     plt.plot(x, density(x), alpha=.5, color=str(colors[i]))
@@ -203,7 +191,7 @@ for acc, i in zip(results_folders, range(num_colors)):
         w = np.load(file_, allow_pickle=True)
         total_weights = np.append(w[-2].flatten(), total_weights)  # 32,10
         total_bias = np.append(w[-1].flatten(), total_bias)  # 10
-    s_output_layer = total_weights.reshape(n_files, neurons_per_layer[2], neurons_per_layer[3]).sum(axis=1) + total_bias.reshape(n_files, neurons_per_layer[3],)
+    s_output_layer = total_weights.reshape(n_files, 32, 10).sum(axis=1) + total_bias.reshape(n_files, 10,)
     s_output_layer += 1  # implicit weights in output
     density = stats.kde.gaussian_kde(s_output_layer.flatten())
     x = np.arange(s_output_layer.min(), s_output_layer.max(), .001)
@@ -223,7 +211,7 @@ for acc, i in zip(results_folders, range(num_colors)):
     for file_ in glob.glob(files_):
         w = np.load(file_, allow_pickle=True)
         total_weights = np.append(w[0].flatten(), total_weights)
-    s_input_layer = 1 + total_weights.reshape(n_files, neurons_per_layer[0], neurons_per_layer[1]).sum(axis=-1)  # +1 for the implicit weights in each input
+    s_input_layer = 1 + total_weights.reshape(n_files, 28*28, 64).sum(axis=-1)  # +1 for the implicit weights in each input
     density = stats.kde.gaussian_kde(s_input_layer.std(axis=-1).flatten())
     x = np.arange(s_input_layer.min(), s_input_layer.max(), .001)
     plt.plot(x, density(x), alpha=.5, color=str(colors[i]))
@@ -244,8 +232,8 @@ for acc, i in zip(results_folders, range(num_colors)):
         total_weights = np.append(w[0].flatten(), total_weights)  # 28*28,64
         total_bias = np.append(w[1].flatten(), total_bias)  # 64
         total_weights_o = np.append(w[2].flatten(), total_weights_o)  # 64,32
-    s_output_layer = total_weights.reshape(n_files, neurons_per_layer[0], neurons_per_layer[1]).sum(axis=1) + total_bias.reshape(n_files, neurons_per_layer[1],)
-    s_output_layer += total_weights_o.reshape(n_files, neurons_per_layer[1], neurons_per_layer[2]).sum(axis=-1)
+    s_output_layer = total_weights.reshape(n_files, 28*28, 64).sum(axis=1) + total_bias.reshape(n_files, 64,)
+    s_output_layer += total_weights_o.reshape(n_files, 64, 32).sum(axis=-1)
     density = stats.kde.gaussian_kde(s_input_layer.std(axis=-1).flatten())
     x = np.arange(s_output_layer.min(), s_output_layer.max(), .001)
     plt.plot(x, density(x), alpha=.5, color=str(colors[i]))
@@ -266,8 +254,8 @@ for acc, i in zip(results_folders, range(num_colors)):
         total_weights = np.append(w[2].flatten(), total_weights)  # 64,32
         total_bias = np.append(w[3].flatten(), total_bias)  # 32
         total_weights_o = np.append(w[4].flatten(), total_weights_o)  # 32,10
-    s_output_layer = total_weights.reshape(n_files, neurons_per_layer[1], neurons_per_layer[2]).sum(axis=1) + total_bias.reshape(n_files, neurons_per_layer[2],)
-    s_output_layer += total_weights_o.reshape(n_files, neurons_per_layer[2], neurons_per_layer[3]).sum(axis=-1) 
+    s_output_layer = total_weights.reshape(n_files, 64, 32).sum(axis=1) + total_bias.reshape(n_files, 32,)
+    s_output_layer += total_weights_o.reshape(n_files, 32, 10).sum(axis=-1) 
     density = stats.kde.gaussian_kde(s_input_layer.std(axis=-1).flatten())
     x = np.arange(s_output_layer.min(), s_output_layer.max(), .001)
     plt.plot(x, density(x), alpha=.5, color=str(colors[i]))
@@ -287,7 +275,7 @@ for acc, i in zip(results_folders, range(num_colors)):
         w = np.load(file_, allow_pickle=True)
         total_weights = np.append(w[-2].flatten(), total_weights)  # 32,10
         total_bias = np.append(w[-1].flatten(), total_bias)  # 10
-    s_output_layer = total_weights.reshape(n_files, neurons_per_layer[2], neurons_per_layer[3]).sum(axis=1) + total_bias.reshape(n_files, neurons_per_layer[3],)
+    s_output_layer = total_weights.reshape(n_files, 32, 10).sum(axis=1) + total_bias.reshape(n_files, 10,)
     s_output_layer += 1  # implicit weights in output
     density = stats.kde.gaussian_kde(s_input_layer.std(axis=-1).flatten())
     x = np.arange(s_output_layer.min(), s_output_layer.max(), .001)
@@ -300,14 +288,15 @@ plt.close()
 ###############################################################################
 # ERRORBARS (SCATTER):
 ###############################################################################
+min_acc, max_acc, step = 0.1, 0.625, 0.025
 # LINK WEIGHTS
 # weights mean and variance L0
 print("\n[logger]: Errorbar mean-variance")
-for a, acc, i in zip(np.arange(0.125,0.975,0.025), results_folders, range(num_colors)):
+for a, acc, i in zip(np.arange(min_acc, max_acc, step), results_folders, range(num_colors)):
     print("\t  Processing results {}".format(acc))
     files_ = files_pattern.replace('@accuracy@', acc)    
     n_files = len(glob.glob(files_))    
-    weights, bias = np.zeros((neurons_per_layer[0],neurons_per_layer[1])), np.zeros(neurons_per_layer[1],)
+    weights, bias = np.zeros((28*28,64)), np.zeros(64,)
     for file_ in glob.glob(files_):
         w = np.load(file_, allow_pickle=True)
         weights += w[0]
@@ -322,11 +311,11 @@ plt.close()
 
 # weights mean and variance L1
 print("\n[logger]: Errorbar mean-variance")
-for a, acc, i in zip(np.arange(0.125,0.975,0.025), results_folders, range(num_colors)):
+for a, acc, i in zip(np.arange(min_acc, max_acc, step), results_folders, range(num_colors)):
     print("\t  Processing results {}".format(acc))
     files_ = files_pattern.replace('@accuracy@', acc)    
     n_files = len(glob.glob(files_))    
-    weights, bias = np.zeros((neurons_per_layer[1],neurons_per_layer[2])), np.zeros(neurons_per_layer[2],)
+    weights, bias = np.zeros((64,32)), np.zeros(32,)
     for file_ in glob.glob(files_):
         w = np.load(file_, allow_pickle=True)
         weights += w[2]
@@ -341,11 +330,11 @@ plt.close()
 
 # weights mean and variance L2
 print("\n[logger]: Errorbar mean-variance")
-for a, acc, i in zip(np.arange(0.125,0.975,0.025), results_folders, range(num_colors)):
+for a, acc, i in zip(np.arange(min_acc, max_acc, step), results_folders, range(num_colors)):
     print("\t  Processing results {}".format(acc))
     files_ = files_pattern.replace('@accuracy@', acc)    
     n_files = len(glob.glob(files_))    
-    weights, bias = np.zeros((neurons_per_layer[2],neurons_per_layer[3])), np.zeros(neurons_per_layer[3],)
+    weights, bias = np.zeros((32,10)), np.zeros(10,)
     for file_ in glob.glob(files_):
         w = np.load(file_, allow_pickle=True)
         weights += w[-2]
@@ -361,11 +350,11 @@ plt.close()
 # NODE STRENGTH
 # node strenght I-L0
 print("\n[logger]: Errorbar node strength I-L0")
-for a, acc, i in zip(np.arange(0.125,0.975,0.025), results_folders, range(num_colors)):
+for a, acc, i in zip(np.arange(min_acc, max_acc, step), results_folders, range(num_colors)):
     print("\t  Processing results {}".format(acc))
     files_ = files_pattern.replace('@accuracy@', acc)    
     n_files = len(glob.glob(files_))    
-    weights = np.zeros((n_files,neurons_per_layer[0],neurons_per_layer[1]))
+    weights = np.zeros((n_files,28*28,64))
     for (j, file_) in enumerate(glob.glob(files_)):
         w = np.load(file_, allow_pickle=True)
         weights[j] = w[0]
@@ -378,12 +367,12 @@ plt.close()
 
 # node strenght output L0-L1
 print("\n[logger]: Errorbar node strength L0-L1")
-for a, acc, i in zip(np.arange(0.125,0.975,0.025), results_folders, range(num_colors)):
+for a, acc, i in zip(np.arange(min_acc, max_acc, step), results_folders, range(num_colors)):
     print("\t  Processing results {}".format(acc))
     files_ = files_pattern.replace('@accuracy@', acc)    
     n_files = len(glob.glob(files_))    
-    weights, bias = np.zeros((n_files, neurons_per_layer[0],neurons_per_layer[1])), np.zeros((n_files, neurons_per_layer[1],))
-    weights_o = np.zeros((n_files,neurons_per_layer[1],neurons_per_layer[2]))
+    weights, bias = np.zeros((n_files, 28*28,64)), np.zeros((n_files, 64,))
+    weights_o = np.zeros((n_files,64,32))
     for (j, file_) in enumerate(glob.glob(files_)):
         w = np.load(file_, allow_pickle=True)
         weights_o[j] = w[2]
@@ -399,12 +388,12 @@ plt.close()
 
 # node strenght output L1-L2
 print("\n[logger]: Errorbar node strength L1-L2")
-for a, acc, i in zip(np.arange(0.125,0.975,0.025), results_folders, range(num_colors)):
+for a, acc, i in zip(np.arange(min_acc, max_acc, step), results_folders, range(num_colors)):
     print("\t  Processing results {}".format(acc))
     files_ = files_pattern.replace('@accuracy@', acc)    
     n_files = len(glob.glob(files_))    
-    weights, bias = np.zeros((n_files,neurons_per_layer[1],neurons_per_layer[2])), np.zeros((n_files,neurons_per_layer[2],))
-    weights_o = np.zeros((n_files,neurons_per_layer[2],neurons_per_layer[3]))
+    weights, bias = np.zeros((n_files,64,32)), np.zeros((n_files,32,))
+    weights_o = np.zeros((n_files,32,10))
     for (j, file_) in enumerate(glob.glob(files_)):
         w = np.load(file_, allow_pickle=True)
         weights_o[j] = w[4]
@@ -420,11 +409,11 @@ plt.close()
 
 # node strenght output L2-O
 print("\n[logger]: Errorbar node strength L2-O")
-for a, acc, i in zip(np.arange(0.125,0.975,0.025), results_folders, range(num_colors)):
+for a, acc, i in zip(np.arange(min_acc, max_acc, step), results_folders, range(num_colors)):
     print("\t  Processing results {}".format(acc))
     files_ = files_pattern.replace('@accuracy@', acc)    
     n_files = len(glob.glob(files_))    
-    weights, bias = np.zeros((n_files,neurons_per_layer[2],neurons_per_layer[3])), np.zeros((n_files,neurons_per_layer[3],))
+    weights, bias = np.zeros((n_files,32,10)), np.zeros((n_files,10,))
     for (j, file_) in enumerate(glob.glob(files_)):
         w = np.load(file_, allow_pickle=True)
         weights[j] = w[4]
@@ -440,11 +429,11 @@ plt.close()
 # STANDARD DEVIATION
 # node std I-L0
 print("\n[logger]: Errorbar node std I-L0")
-for a, acc, i in zip(np.arange(0.125,0.975,0.025), results_folders, range(num_colors)):
+for a, acc, i in zip(np.arange(min_acc, max_acc, step), results_folders, range(num_colors)):
     print("\t  Processing results {}".format(acc))
     files_ = files_pattern.replace('@accuracy@', acc)    
     n_files = len(glob.glob(files_))    
-    weights = np.zeros((n_files,neurons_per_layer[0],neurons_per_layer[1]))
+    weights = np.zeros((n_files,28*28,64))
     for (j, file_) in enumerate(glob.glob(files_)):
         w = np.load(file_, allow_pickle=True)
         weights[j] = w[0]
@@ -457,17 +446,17 @@ plt.close()
 
 # node std output L0-L1
 print("\n[logger]: Errorbar node std L0-L1")
-for a, acc, i in zip(np.arange(0.125,0.975,0.025), results_folders, range(num_colors)):
+for a, acc, i in zip(np.arange(min_acc, max_acc, step), results_folders, range(num_colors)):
     print("\t  Processing results {}".format(acc))
     files_ = files_pattern.replace('@accuracy@', acc)    
     n_files = len(glob.glob(files_))    
-    weights, bias = np.zeros((n_files, neurons_per_layer[0],neurons_per_layer[1])), np.zeros((n_files, neurons_per_layer[1],))
-    weights_o = np.zeros((n_files,neurons_per_layer[1],neurons_per_layer[2]))
+    weights, bias = np.zeros((n_files, 28*28,64)), np.zeros((n_files, 64,))
+    weights_o = np.zeros((n_files,64,32))
     for (j, file_) in enumerate(glob.glob(files_)):
         w = np.load(file_, allow_pickle=True)
         weights_o[j] = w[2]
         weights[j] = w[0]
-        bias[i] = w[1]
+        bias[j] = w[1]
     s_output_layer = weights.sum(axis=1) + bias
     s_output_layer += weights_o.sum(axis=2)
     s_output_layer = s_output_layer.std(axis=-1)
@@ -478,12 +467,12 @@ plt.close()
 
 # node std output L1-L2
 print("\n[logger]: Errorbar node std L1-L2")
-for a, acc, i in zip(np.arange(0.125,0.975,0.025), results_folders, range(num_colors)):
+for a, acc, i in zip(np.arange(min_acc, max_acc, step), results_folders, range(num_colors)):
     print("\t  Processing results {}".format(acc))
     files_ = files_pattern.replace('@accuracy@', acc)    
     n_files = len(glob.glob(files_))    
-    weights, bias = np.zeros((n_files,neurons_per_layer[1],neurons_per_layer[2])), np.zeros((n_files,neurons_per_layer[2],))
-    weights_o = np.zeros((n_files,neurons_per_layer[2],neurons_per_layer[3]))
+    weights, bias = np.zeros((n_files,64,32)), np.zeros((n_files,32,))
+    weights_o = np.zeros((n_files,32,10))
     for (j, file_) in enumerate(glob.glob(files_)):
         w = np.load(file_, allow_pickle=True)
         weights_o[j] = w[4]
@@ -499,11 +488,11 @@ plt.close()
 
 # node std output L2-O
 print("\n[logger]: Errorbar node std L2-O")
-for a, acc, i in zip(np.arange(0.125,0.975,0.025), results_folders, range(num_colors)):
+for a, acc, i in zip(np.arange(min_acc, max_acc, step), results_folders, range(num_colors)):
     print("\t  Processing results {}".format(acc))
     files_ = files_pattern.replace('@accuracy@', acc)    
     n_files = len(glob.glob(files_))    
-    weights, bias = np.zeros((n_files,neurons_per_layer[2],neurons_per_layer[3])), np.zeros((n_files,neurons_per_layer[3],))
+    weights, bias = np.zeros((n_files,32,10)), np.zeros((n_files,10,))
     for (j, file_) in enumerate(glob.glob(files_)):
         w = np.load(file_, allow_pickle=True)
         weights[j] = w[4]
